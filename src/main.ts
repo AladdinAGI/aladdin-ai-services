@@ -1,17 +1,18 @@
 import { ChatOpenAI } from '@langchain/openai';
 import { AgentExecutor, createReactAgent } from 'langchain/agents';
-import { pull } from 'langchain/hub';
+import { Tool } from '@langchain/core/tools';
+import { ChatPromptTemplate } from '@langchain/core/prompts';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
-class Calculator {
+class Calculator extends Tool {
 	name = 'calculator';
 	description = '用于执行数学计算';
 
-	async call(input: string): Promise<string> {
+	async _call(input: string): Promise<string> {
 		try {
 			return eval(input).toString();
 		} catch (error) {
@@ -28,7 +29,13 @@ async function createAgent() {
 	});
 
 	const tools = [new Calculator()];
-	const prompt = await pull('hwchase17/react-chat');
+
+	// 更新 prompt 模板，包含所有必需的变量
+	const prompt = ChatPromptTemplate.fromMessages([
+		['system', '你是一个有用的AI助手。可用的工具有：\n{tool_names}\n\n工具详情：\n{tools}'],
+		['human', '{input}'],
+		['assistant', '让我思考如何解决这个问题。\n{agent_scratchpad}'],
+	]);
 
 	const agent = await createReactAgent({
 		llm: model,
