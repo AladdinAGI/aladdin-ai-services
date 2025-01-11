@@ -3,7 +3,7 @@
 		"esModuleInterop": true,
 		"moduleResolution": "node",
 		"target": "ES2020",
-		"module": "ES2020",
+		"module": "CommonJS",
 		"lib": ["ES2020"],
 		"strict": true,
 		"baseUrl": ".",
@@ -20,10 +20,6 @@
 			"@/*": ["./src/*"],
 			"@langchain/langgraph": ["../langgraph/src"]
 		}
-	},
-	"ts-node": {
-		"esm": true,
-		"experimentalSpecifierResolution": "node"
 	},
 	"include": ["src/**/*"],
 	"exclude": ["node_modules", "dist", "test"]
