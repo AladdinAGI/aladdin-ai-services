@@ -1,11 +1,416 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh">
 	<head>
-		<meta charset="utf-8" />
-		<title>My First Parcel App</title>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>AI Agent 助手</title>
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+
+			body {
+				font-family: Arial, sans-serif;
+				height: 100vh;
+				display: flex;
+			}
+
+			/* 左侧历史记录 */
+			.history-panel {
+				width: 250px;
+				background: #f7f7f7;
+				padding: 20px;
+				border-right: 1px solid #ddd;
+				overflow-y: auto;
+			}
+
+			.history-item {
+				padding: 10px;
+				margin-bottom: 8px;
+				background: white;
+				border-radius: 4px;
+				cursor: pointer;
+				border: 1px solid #eee;
+			}
+
+			.history-item:hover {
+				background: #f0f0f0;
+			}
+
+			/* 中间聊天区域 */
+			.chat-panel {
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+				background: white;
+			}
+
+			.chat-history {
+				flex: 1;
+				padding: 20px;
+				overflow-y: auto;
+			}
+
+			.message {
+				margin-bottom: 20px;
+				max-width: 80%;
+			}
+
+			.user-message {
+				margin-left: auto;
+				background: #007bff;
+				color: white;
+				padding: 10px 15px;
+				border-radius: 20px 20px 0 20px;
+			}
+
+			.bot-message {
+				background: #f1f1f1;
+				padding: 10px 15px;
+				border-radius: 20px 20px 20px 0;
+			}
+
+			.quick-questions {
+				padding: 20px;
+				border-bottom: 1px solid #ddd;
+				display: flex;
+				gap: 10px;
+				overflow-x: auto;
+			}
+
+			.quick-question {
+				padding: 8px 16px;
+				background: #f0f0f0;
+				border: none;
+				border-radius: 20px;
+				cursor: pointer;
+				white-space: nowrap;
+			}
+
+			.quick-question:hover {
+				background: #e0e0e0;
+			}
+
+			.input-area {
+				padding: 20px;
+				border-top: 1px solid #ddd;
+				display: flex;
+				flex-direction: column;
+				gap: 10px;
+			}
+
+			#messageInput {
+				flex: 1;
+				padding: 10px;
+				border: 1px solid #ddd;
+				border-radius: 4px;
+				resize: none;
+			}
+
+			.input-help {
+				font-size: 12px;
+				color: #666;
+				margin-bottom: 10px;
+			}
+
+			#sendButton {
+				padding: 10px 20px;
+				background: #007bff;
+				color: white;
+				border: none;
+				border-radius: 4px;
+				cursor: pointer;
+			}
+
+			#sendButton:hover {
+				background: #0056b3;
+			}
+
+			/* 右侧钱包区域 */
+			.wallet-panel {
+				width: 300px;
+				background: #f7f7f7;
+				padding: 20px;
+				border-left: 1px solid #ddd;
+			}
+
+			.wallet-connect {
+				padding: 10px;
+				background: #28a745;
+				color: white;
+				border: none;
+				border-radius: 4px;
+				width: 100%;
+				cursor: pointer;
+				margin-bottom: 10px;
+			}
+
+			.network-select {
+				width: 100%;
+				padding: 8px;
+				margin-bottom: 10px;
+				border-radius: 4px;
+				border: 1px solid #ddd;
+			}
+
+			.wallet-info {
+				margin-top: 20px;
+			}
+
+			.loading {
+				display: none;
+				text-align: center;
+				padding: 20px;
+			}
+
+			.loading.active {
+				display: block;
+			}
+		</style>
 	</head>
 	<body>
-		<h1>Hello, World!</h1>
-		<script type="module" src="../src/main.ts"></script>
+		<!-- 左侧历史记录 -->
+		<div class="history-panel">
+			<h3>历史记录</h3>
+			<div id="historyList">
+				<!-- 历史记录将在这里动态添加 -->
+			</div>
+		</div>
+
+		<!-- 中间聊天区域 -->
+		<div class="chat-panel">
+			<!-- 快捷问题 -->
+			<div class="quick-questions">
+				<button class="quick-question" data-question="比特币的当前价格是多少？">比特币价格</button>
+				<button class="quick-question" data-question="推荐一些稳定币质押方案">推荐一些稳定币质押方案</button>
+				<button
+					class="quick-question"
+					data-question="查询钱包地址：0x742d35Cc6634C0532925a3b844Bc454e4438f44e 在以太坊上的余额">
+					查ETH余额示例
+				</button>
+				<button
+					class="quick-question"
+					data-question="查询钱包地址：0x742d35Cc6634C0532925a3b844Bc454e4438f44e 在 Polygon 上的余额">
+					查 Polygon 余额示例
+				</button>
+			</div>
+
+			<!-- 聊天历史 -->
+			<div class="chat-history" id="chatHistory">
+				<!-- 消息将在这里动态添加 -->
+			</div>
+
+			<!-- 加载提示 -->
+			<div id="loading" class="loading">思考中...</div>
+
+			<!-- 输入区域 -->
+			<div class="input-area">
+				<div class="input-help">
+					支持以下查询格式：
+					<br />• 查询钱包地址：[地址] 在以太坊上的余额 <br />• 查询钱包地址：[地址] 在 Polygon 上的余额
+					<br />• 查询钱包地址：[地址] 在 BSC 上的余额
+				</div>
+				<textarea
+					id="messageInput"
+					placeholder="输入你的问题...(例如：查询钱包地址：0x742d... 在以太坊上的余额)"
+					rows="3"></textarea>
+				<button id="sendButton">发送</button>
+			</div>
+		</div>
+
+		<!-- 右侧钱包区域 -->
+		<div class="wallet-panel">
+			<button id="connectWallet" class="wallet-connect">连接钱包</button>
+			<select id="networkSelect" class="network-select">
+				<option value="1">Ethereum Mainnet</option>
+				<option value="137">Polygon Mainnet</option>
+				<option value="56">BSC Mainnet</option>
+			</select>
+			<div id="walletInfo" class="wallet-info">
+				<!-- 钱包信息将在这里显示 -->
+			</div>
+		</div>
+
+		<script>
+			class ChatApp {
+				constructor() {
+					this.messageInput = document.getElementById('messageInput');
+					this.sendButton = document.getElementById('sendButton');
+					this.chatHistory = document.getElementById('chatHistory');
+					this.loading = document.getElementById('loading');
+					this.historyList = document.getElementById('historyList');
+					this.connectWallet = document.getElementById('connectWallet');
+					this.walletInfo = document.getElementById('walletInfo');
+					this.networkSelect = document.getElementById('networkSelect');
+					this.currentAccount = null;
+
+					this.initializeEventListeners();
+					this.checkWalletConnection();
+				}
+
+				async checkWalletConnection() {
+					if (typeof window.ethereum !== 'undefined') {
+						const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+						if (accounts.length > 0) {
+							this.handleAccountsChanged(accounts);
+						}
+					}
+				}
+
+				initializeEventListeners() {
+					// 发送消息
+					this.sendButton.addEventListener('click', () => this.sendMessage());
+					this.messageInput.addEventListener('keypress', (e) => {
+						if (e.key === 'Enter' && !e.shiftKey) {
+							e.preventDefault();
+							this.sendMessage();
+						}
+					});
+
+					// 快捷问题
+					document.querySelectorAll('.quick-question').forEach((button) => {
+						button.addEventListener('click', () => {
+							this.messageInput.value = button.dataset.question;
+							this.sendMessage();
+						});
+					});
+
+					// 钱包连接
+					this.connectWallet.addEventListener('click', () => this.connectWalletHandler());
+
+					// 网络切换
+					this.networkSelect.addEventListener('change', (e) => this.switchNetwork(e.target.value));
+				}
+
+				async sendMessage() {
+					const message = this.messageInput.value.trim();
+					if (!message) return;
+
+					// 添加用户消息到聊天
+					this.addMessage(message, 'user');
+					this.messageInput.value = '';
+
+					// 显示加载状态
+					this.loading.classList.add('active');
+
+					try {
+						const response = await fetch('http://localhost:3000/query', {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json',
+							},
+							body: JSON.stringify({ input: message }),
+						});
+
+						const data = await response.json();
+
+						// 添加响应到聊天
+						this.addMessage(data.output, 'bot');
+
+						// 添加到历史记录
+						this.addToHistory(message, data.output);
+					} catch (error) {
+						this.addMessage('抱歉，处理您的请求时出现错误', 'bot');
+					} finally {
+						this.loading.classList.remove('active');
+					}
+				}
+
+				addMessage(content, type) {
+					const messageDiv = document.createElement('div');
+					messageDiv.className = `message ${type}-message`;
+					messageDiv.textContent = content;
+					this.chatHistory.appendChild(messageDiv);
+					this.chatHistory.scrollTop = this.chatHistory.scrollHeight;
+				}
+
+				addToHistory(question, answer) {
+					const historyItem = document.createElement('div');
+					historyItem.className = 'history-item';
+					historyItem.textContent = question;
+					historyItem.addEventListener('click', () => {
+						this.messageInput.value = question;
+						this.sendMessage();
+					});
+					this.historyList.insertBefore(historyItem, this.historyList.firstChild);
+				}
+
+				async connectWalletHandler() {
+					if (typeof window.ethereum !== 'undefined') {
+						try {
+							const accounts = await window.ethereum.request({
+								method: 'eth_requestAccounts',
+							});
+							this.handleAccountsChanged(accounts);
+						} catch (error) {
+							console.error('连接钱包失败:', error);
+						}
+					} else {
+						alert('请安装 MetaMask!');
+					}
+				}
+
+				handleAccountsChanged(accounts) {
+					if (accounts.length === 0) {
+						this.walletInfo.style.display = 'none';
+						this.connectWallet.style.display = 'block';
+						this.currentAccount = null;
+					} else {
+						this.currentAccount = accounts[0];
+						this.walletInfo.innerHTML = `
+                       <p>已连接钱包</p>
+                       <p>${this.currentAccount.slice(0, 6)}...${this.currentAccount.slice(-4)}</p>
+                   `;
+						this.connectWallet.style.display = 'none';
+						this.updateNetwork();
+					}
+				}
+
+				async updateNetwork() {
+					try {
+						const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+						this.networkSelect.value = parseInt(chainId, 16).toString();
+					} catch (error) {
+						console.error('获取网络信息失败:', error);
+					}
+				}
+
+				async switchNetwork(networkId) {
+					const networks = {
+						1: {
+							chainId: '0x1',
+							name: 'Ethereum Mainnet',
+						},
+						137: {
+							chainId: '0x89',
+							name: 'Polygon Mainnet',
+						},
+						56: {
+							chainId: '0x38',
+							name: 'BSC Mainnet',
+						},
+					};
+
+					const network = networks[networkId];
+					if (!network) return;
+
+					try {
+						await window.ethereum.request({
+							method: 'wallet_switchEthereumChain',
+							params: [{ chainId: network.chainId }],
+						});
+					} catch (error) {
+						console.error('切换网络失败:', error);
+					}
+				}
+			}
+
+			// 初始化应用
+			document.addEventListener('DOMContentLoaded', () => {
+				new ChatApp();
+			});
+		</script>
 	</body>
 </html>

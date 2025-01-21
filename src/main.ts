@@ -1,66 +1,57 @@
-import { ChatOpenAI } from '@langchain/openai';
-import { AgentExecutor, createReactAgent } from 'langchain/agents';
-import { Tool } from '@langchain/core/tools';
-import { ChatPromptTemplate } from '@langchain/core/prompts';
+// src/main.ts
 import dotenv from 'dotenv';
+import Koa from 'koa';
+import Router from '@koa/router';
+import cors from '@koa/cors';
+import bodyParser from 'koa-bodyparser';
+import { AgentService } from './services/agent.service';
 
 dotenv.config();
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const app = new Koa();
+const router = new Router();
+const port = 3000;
 
-class Calculator extends Tool {
-	name = 'calculator';
-	description = '用于执行数学计算';
+// 创建 AgentService 实例
+const agentService = new AgentService(process.env.OPENAI_API_KEY || '');
 
-	async _call(input: string): Promise<string> {
-		try {
-			return eval(input).toString();
-		} catch (error) {
-			return '计算错误';
-		}
-	}
-}
+// 初始化 agents
+agentService.initialize().catch(console.error);
 
-async function createAgent() {
-	const model = new ChatOpenAI({
-		openAIApiKey: OPENAI_API_KEY,
-		temperature: 0,
-		modelName: 'gpt-3.5-turbo',
-	});
+// 中间件
+app.use(cors());
+app.use(bodyParser());
 
-	const tools = [new Calculator()];
-
-	// 更新 prompt 模板，包含所有必需的变量
-	const prompt = ChatPromptTemplate.fromMessages([
-		['system', '你是一个有用的AI助手。可用的工具有：\n{tool_names}\n\n工具详情：\n{tools}'],
-		['human', '{input}'],
-		['assistant', '让我思考如何解决这个问题。\n{agent_scratchpad}'],
-	]);
-
-	const agent = await createReactAgent({
-		llm: model,
-		tools,
-		prompt,
-	});
-
-	return new AgentExecutor({
-		agent,
-		tools,
-		maxIterations: 3,
-	});
-}
-
-async function runAgent() {
+// API 路由
+router.post('/query', async (ctx) => {
 	try {
-		const agent = await createAgent();
-		const question = '当前比特币(BTC)的价格是多少?';
+		const { input } = ctx.request.body as { input: string };
+		if (!input) {
+			ctx.status = 400;
+			ctx.body = { error: '请提供问题内容' };
+			return;
+		}
 
-		console.log('问题:', question);
-		const result = await agent.invoke({ input: question });
-		console.log('回答:', result.output);
+		const result = await agentService.query(input);
+		ctx.body = result;
 	} catch (error) {
-		console.error('错误:', error);
+		ctx.status = 500;
+		ctx.body = {
+			error: '服务器错误',
+			message: error instanceof Error ? error.message : '未知错误',
+		};
 	}
-}
+});
 
-runAgent();
+// 错误处理
+app.on('error', (err, ctx) => {
+	console.error('服务器错误:', err);
+});
+
+// 使用路由
+app.use(router.routes()).use(router.allowedMethods());
+
+// 启动服务器
+app.listen(port, () => {
+	console.log(`服务器运行在 http://localhost:${port}`);
+});
