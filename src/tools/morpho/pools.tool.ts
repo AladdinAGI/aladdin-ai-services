@@ -33,22 +33,28 @@ export class MorphoPoolsTool extends Tool {
 	];
 
 	async _call(input: string): Promise<string> {
+		console.log('Tool Invoked with Input:', input);
+
 		try {
-			let response = '基于 Morpho 协议的稳定币质押方案推荐：\n\n';
-			this.pools.forEach((pool) => {
-				response += `${pool.name}:\n`;
-				response += `- 当前 APY: ${pool.apy}%\n`;
-				response += `- TVL (总锁仓量): $${pool.totalSupply.toLocaleString()}\n`;
-				response += `- 风险评级: ${this.getRiskLevel(pool.risk as 'low' | 'medium' | 'high')}\n`;
-				response += `- 市场类型: ${pool.details}\n\n`;
-			});
+			const result = this.pools.map((pool) => ({
+				name: pool.name,
+				token: pool.token,
+				apy: pool.apy,
+				tvl: pool.totalSupply,
+				risk: this.getRiskLevel(pool.risk as 'low' | 'medium' | 'high'),
+				details: pool.details,
+			}));
 
-			response += '\n重要提示：\n';
-			response += '投资前请仔细评估风险，合理分配资金\n';
-
-			return response;
+			const output = JSON.stringify({ data: result });
+			console.log('Tool Output:🌺🌺🌺🌺🌺', output); // 打印返回值
+			return output;
 		} catch (error) {
-			return '获取 Morpho 质押池信息失败: ' + (error instanceof Error ? error.message : '未知错误');
+			const errorOutput = JSON.stringify({
+				data: [],
+				error: '获取 Morpho 质押池信息失败🌺🌺🌺: ' + (error instanceof Error ? error.message : '未知错误'),
+			});
+			console.error('Tool Error:', errorOutput);
+			return errorOutput;
 		}
 	}
 

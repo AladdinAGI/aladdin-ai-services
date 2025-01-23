@@ -243,7 +243,6 @@
 					this.connectWallet = document.getElementById('connectWallet');
 					this.walletInfo = document.getElementById('walletInfo');
 
-					// 加密货币映射表
 					this.cryptoMap = {
 						比特币: 'BTC',
 						以太坊: 'ETH',
@@ -275,7 +274,6 @@
 					this.connectWallet.addEventListener('click', () => this.connectWalletHandler());
 				}
 
-				// 处理加密货币名称转换
 				processCryptoMessage(message) {
 					let processedMessage = message;
 					Object.entries(this.cryptoMap).forEach(([name, code]) => {
@@ -289,9 +287,7 @@
 					const message = this.messageInput.value.trim();
 					if (!message) return;
 
-					// 处理消息中的加密货币名称
 					const processedMessage = this.processCryptoMessage(message);
-
 					this.addMessage(message, 'user');
 					this.messageInput.value = '';
 					this.loading.style.display = 'block';
@@ -306,7 +302,16 @@
 						const data = await response.json();
 
 						if (data.type === 'staking_pools') {
-							this.renderStakingPools(data);
+							// 解析 JSON 字符串
+							let poolsData;
+							try {
+								// 如果 output 是字符串，尝试解析它
+								poolsData = typeof data.output === 'string' ? JSON.parse(data.output) : data.output;
+							} catch (e) {
+								console.error('JSON 解析错误:', e);
+								poolsData = data.output;
+							}
+							this.renderStakingPools(poolsData);
 						} else if (data.type === 'crypto_price') {
 							this.renderCryptoPrice(data);
 						} else {
@@ -325,9 +330,49 @@
 				renderStakingPools(data) {
 					const messageDiv = document.createElement('div');
 					messageDiv.className = 'message bot-message';
-					messageDiv.innerHTML = this.formatStakingPoolsHtml(data.output);
+					messageDiv.innerHTML = this.formatStakingPoolsHtml(data);
 					this.chatHistory.appendChild(messageDiv);
 					this.chatHistory.scrollTop = this.chatHistory.scrollHeight;
+				}
+
+				formatStakingPoolsHtml(data) {
+					// 检查数据格式是否正确
+					if (!Array.isArray(data.data)) {
+						return '<p>无法获取质押池数据</p>';
+					}
+
+					let html = '<div class="pools-container">';
+					html += '<table class="pools-table">';
+					html += `
+            <thead>
+                <tr>
+                    <th>池子</th>
+                    <th>币种</th>
+                    <th>APY</th>
+                    <th>总供应量</th>
+                    <th>风险</th>
+                    <th>详情</th>
+                </tr>
+            </thead>
+            <tbody>
+        `;
+
+					data.data.forEach((pool) => {
+						html += `
+                <tr>
+                    <td>${pool.name}</td>
+                    <td>${pool.token}</td>
+                    <td class="apy">${pool.apy}%</td>
+                    <td>$${pool.tvl.toLocaleString()}</td>
+                    <td>${pool.risk}</td>
+                    <td>${pool.details}</td>
+                </tr>
+            `;
+					});
+
+					html += '</tbody></table>';
+					html += '</div>';
+					return html;
 				}
 
 				renderCryptoPrice(data) {
@@ -338,46 +383,8 @@
 					this.chatHistory.scrollTop = this.chatHistory.scrollHeight;
 				}
 
-				formatStakingPoolsHtml(output) {
-					// 将文本格式的输出转换为HTML表格
-					const lines = output.split('\n');
-					let html = '<div class="pools-container">';
-					html += '<table class="pools-table">';
-					html += '<thead><tr><th>池子</th><th>APY</th><th>总供应量</th><th>风险</th></tr></thead>';
-					html += '<tbody>';
-
-					let currentPool = null;
-					lines.forEach((line) => {
-						if (line.endsWith(':') && !line.startsWith('-')) {
-							currentPool = {
-								name: line.slice(0, -1),
-							};
-						} else if (line.startsWith('- 当前 APY:')) {
-							currentPool.apy = line.match(/[\d.]+/)[0];
-						} else if (line.startsWith('- TVL')) {
-							currentPool.tvl = line.match(/\$[\d,]+/)[0];
-						} else if (line.startsWith('- 风险')) {
-							currentPool.risk = line.split(': ')[1];
-							// 添加完整的池子信息
-							html += `
-                   <tr>
-                       <td>${currentPool.name}</td>
-                       <td class="apy">${currentPool.apy}%</td>
-                       <td>${currentPool.tvl}</td>
-                       <td>${currentPool.risk}</td>
-                   </tr>
-               `;
-						}
-					});
-
-					html += '</tbody></table>';
-					html += '</div>';
-					return html;
-				}
-
 				formatCryptoPriceHtml(output) {
 					const lines = output.split('\n');
-					console.log('lines: ', lines);
 					let html = '<div class="crypto-price">';
 
 					lines.forEach((line) => {
@@ -424,9 +431,9 @@
 							});
 							const address = accounts[0];
 							this.walletInfo.innerHTML = `
-                   <p>已连接钱包</p>
-                   <p>${address.slice(0, 6)}...${address.slice(-4)}</p>
-               `;
+                    <p>已连接钱包</p>
+                    <p>${address.slice(0, 6)}...${address.slice(-4)}</p>
+                `;
 							this.connectWallet.style.display = 'none';
 						} catch (error) {
 							console.error('连接钱包失败:', error);
@@ -441,15 +448,14 @@
 						const accounts = await window.ethereum.request({ method: 'eth_accounts' });
 						if (accounts.length > 0) {
 							this.walletInfo.innerHTML = `
-                   <p>已连接钱包</p>
-                   <p>${accounts[0].slice(0, 6)}...${accounts[0].slice(-4)}</p>
-               `;
+                    <p>已连接钱包</p>
+                    <p>${accounts[0].slice(0, 6)}...${accounts[0].slice(-4)}</p>
+                `;
 							this.connectWallet.style.display = 'none';
 						}
 					}
 				}
 			}
-
 			document.addEventListener('DOMContentLoaded', () => {
 				new ChatApp();
 			});

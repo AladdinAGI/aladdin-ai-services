@@ -56,7 +56,7 @@ export class AgentService {
 					};
 				default:
 					// const response = await this.openaiService.query(input);
-					return { output: '我是专注给您进稳定币投资的机器人，不能回答您其他问题' };
+					return { output: '我是专注给您进稳定币投资的机器人' };
 			}
 		} catch (error) {
 			return {
