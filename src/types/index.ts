@@ -8,32 +8,19 @@ export interface AgentConfig {
 export interface AgentResponse {
 	output: string;
 	error?: string;
-	intermediateSteps?: any[];
+	type?: 'staking_pools' | 'crypto_price' | 'default' | 'error'; // 添加这个字段
+	data?: any; // 可选的数据字段
 }
 
-export interface ChainResponse {
-	result: string;
-	error?: string;
-}
-
-export interface CryptoPrice {
-	amount: string;
-	base: string;
-	currency: string;
-}
-
-export interface StakingPool {
+export interface MorphoPool {
 	name: string;
+	token: string;
 	apy: number;
-	tvl: number;
+	totalSupply: number;
 	risk: 'low' | 'medium' | 'high';
+	details: string;
 }
 
-export interface WalletBalance {
-	address: string;
-	tokens: {
-		symbol: string;
-		balance: string;
-		usdValue: number;
-	}[];
+export interface StakingPoolsResponse {
+	pools: MorphoPool[];
 }

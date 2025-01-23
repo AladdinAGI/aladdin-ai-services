@@ -1,21 +1,11 @@
 // src/tools/morpho/pools.tool.ts
 import { Tool } from '@langchain/core/tools';
 
-interface MorphoPool {
-	name: string;
-	apy: number;
-	totalSupply: number;
-	token: string;
-	risk: 'low' | 'medium' | 'high';
-	details: string;
-}
-
 export class MorphoPoolsTool extends Tool {
 	name = 'morpho_pools';
 	description = 'Get information about Morpho staking pools and recommendations';
 
-	// 精选的 Morpho 质押池列表
-	private readonly pools: MorphoPool[] = [
+	private readonly pools = [
 		{
 			name: 'USDT Supply',
 			token: 'USDT',
@@ -45,19 +35,16 @@ export class MorphoPoolsTool extends Tool {
 	async _call(input: string): Promise<string> {
 		try {
 			let response = '基于 Morpho 协议的稳定币质押方案推荐：\n\n';
-
 			this.pools.forEach((pool) => {
 				response += `${pool.name}:\n`;
 				response += `- 当前 APY: ${pool.apy}%\n`;
 				response += `- TVL (总锁仓量): $${pool.totalSupply.toLocaleString()}\n`;
-				response += `- 风险评级: ${this.getRiskLevel(pool.risk)}\n`;
+				response += `- 风险评级: ${this.getRiskLevel(pool.risk as 'low' | 'medium' | 'high')}\n`;
 				response += `- 市场类型: ${pool.details}\n\n`;
 			});
 
 			response += '\n重要提示：\n';
-			response += '1. 以上数据来自 Morpho 协议精选池子\n';
-			response += '2. 建议在 Morpho 官网 (https://app.morpho.org) 进行操作\n';
-			response += '3. 投资前请仔细评估风险，合理分配资金\n';
+			response += '投资前请仔细评估风险，合理分配资金\n';
 
 			return response;
 		} catch (error) {

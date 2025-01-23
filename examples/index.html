@@ -5,6 +5,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>AI Agent 助手</title>
 		<style>
+			/* 基础样式 */
 			* {
 				margin: 0;
 				padding: 0;
@@ -30,7 +31,7 @@
 				padding: 10px;
 				margin-bottom: 8px;
 				background: white;
-				border-radius: 4px;
+				border-radius: 8px;
 				cursor: pointer;
 				border: 1px solid #eee;
 			}
@@ -56,24 +57,70 @@
 			.message {
 				margin-bottom: 20px;
 				max-width: 80%;
+				white-space: pre-wrap;
+				word-wrap: break-word;
 			}
 
 			.user-message {
 				margin-left: auto;
 				background: #007bff;
 				color: white;
-				padding: 10px 15px;
-				border-radius: 20px 20px 0 20px;
+				padding: 12px 16px;
+				border-radius: 12px 12px 0 12px;
 			}
 
 			.bot-message {
-				background: #f1f1f1;
-				padding: 10px 15px;
-				border-radius: 20px 20px 20px 0;
+				background: #f8f9fa;
+				padding: 12px 16px;
+				border-radius: 12px 12px 12px 0;
+				border: 1px solid #eee;
 			}
 
+			/* 质押池表格样式 */
+			.pools-table {
+				width: 100%;
+				border-collapse: collapse;
+				margin: 10px 0;
+				background: white;
+				border-radius: 8px;
+				overflow: hidden;
+				box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+			}
+
+			.pools-table th,
+			.pools-table td {
+				padding: 12px;
+				text-align: left;
+				border-bottom: 1px solid #eee;
+			}
+
+			.pools-table th {
+				background: #f8f9fa;
+				font-weight: 600;
+			}
+
+			.pools-table .apy {
+				color: #28a745;
+				font-weight: bold;
+			}
+
+			.stake-button {
+				display: inline-block;
+				padding: 6px 12px;
+				background: #007bff;
+				color: white;
+				text-decoration: none;
+				border-radius: 4px;
+				font-size: 0.9em;
+			}
+
+			.stake-button:hover {
+				background: #0056b3;
+			}
+
+			/* 快捷问题区域 */
 			.quick-questions {
-				padding: 20px;
+				padding: 15px;
 				border-bottom: 1px solid #ddd;
 				display: flex;
 				gap: 10px;
@@ -82,37 +129,32 @@
 
 			.quick-question {
 				padding: 8px 16px;
-				background: #f0f0f0;
-				border: none;
+				background: white;
+				border: 1px solid #ddd;
 				border-radius: 20px;
 				cursor: pointer;
 				white-space: nowrap;
 			}
 
 			.quick-question:hover {
-				background: #e0e0e0;
+				background: #f0f0f0;
 			}
 
+			/* 输入区域 */
 			.input-area {
 				padding: 20px;
 				border-top: 1px solid #ddd;
-				display: flex;
-				flex-direction: column;
-				gap: 10px;
+				background: #f8f9fa;
 			}
 
 			#messageInput {
-				flex: 1;
-				padding: 10px;
+				width: 100%;
+				padding: 12px;
 				border: 1px solid #ddd;
-				border-radius: 4px;
-				resize: none;
-			}
-
-			.input-help {
-				font-size: 12px;
-				color: #666;
+				border-radius: 8px;
 				margin-bottom: 10px;
+				resize: vertical;
+				min-height: 60px;
 			}
 
 			#sendButton {
@@ -120,7 +162,7 @@
 				background: #007bff;
 				color: white;
 				border: none;
-				border-radius: 4px;
+				border-radius: 8px;
 				cursor: pointer;
 			}
 
@@ -144,19 +186,11 @@
 				border-radius: 4px;
 				width: 100%;
 				cursor: pointer;
-				margin-bottom: 10px;
+				margin-bottom: 15px;
 			}
 
-			.network-select {
-				width: 100%;
-				padding: 8px;
-				margin-bottom: 10px;
-				border-radius: 4px;
-				border: 1px solid #ddd;
-			}
-
-			.wallet-info {
-				margin-top: 20px;
+			.wallet-connect:hover {
+				background: #218838;
 			}
 
 			.loading {
@@ -171,66 +205,31 @@
 		</style>
 	</head>
 	<body>
-		<!-- 左侧历史记录 -->
 		<div class="history-panel">
 			<h3>历史记录</h3>
-			<div id="historyList">
-				<!-- 历史记录将在这里动态添加 -->
-			</div>
+			<div id="historyList"></div>
 		</div>
 
-		<!-- 中间聊天区域 -->
 		<div class="chat-panel">
-			<!-- 快捷问题 -->
 			<div class="quick-questions">
 				<button class="quick-question" data-question="比特币的当前价格是多少？">比特币价格</button>
-				<button class="quick-question" data-question="推荐一些稳定币质押方案">推荐一些稳定币质押方案</button>
-				<button
-					class="quick-question"
-					data-question="查询钱包地址：0x742d35Cc6634C0532925a3b844Bc454e4438f44e 在以太坊上的余额">
-					查ETH余额示例
-				</button>
-				<button
-					class="quick-question"
-					data-question="查询钱包地址：0x742d35Cc6634C0532925a3b844Bc454e4438f44e 在 Polygon 上的余额">
-					查 Polygon 余额示例
-				</button>
+				<button class="quick-question" data-question="推荐一些稳定币质押方案">推荐质押方案</button>
+				<button class="quick-question" data-question="你是谁？">关于AI助手</button>
 			</div>
 
-			<!-- 聊天历史 -->
-			<div class="chat-history" id="chatHistory">
-				<!-- 消息将在这里动态添加 -->
-			</div>
+			<div class="chat-history" id="chatHistory"></div>
 
-			<!-- 加载提示 -->
-			<div id="loading" class="loading">思考中...</div>
+			<div id="loading" class="loading">AI思考中...</div>
 
-			<!-- 输入区域 -->
 			<div class="input-area">
-				<div class="input-help">
-					支持以下查询格式：
-					<br />• 查询钱包地址：[地址] 在以太坊上的余额 <br />• 查询钱包地址：[地址] 在 Polygon 上的余额
-					<br />• 查询钱包地址：[地址] 在 BSC 上的余额
-				</div>
-				<textarea
-					id="messageInput"
-					placeholder="输入你的问题...(例如：查询钱包地址：0x742d... 在以太坊上的余额)"
-					rows="3"></textarea>
+				<textarea id="messageInput" placeholder="请输入你的问题..." rows="3"></textarea>
 				<button id="sendButton">发送</button>
 			</div>
 		</div>
 
-		<!-- 右侧钱包区域 -->
 		<div class="wallet-panel">
 			<button id="connectWallet" class="wallet-connect">连接钱包</button>
-			<select id="networkSelect" class="network-select">
-				<option value="1">Ethereum Mainnet</option>
-				<option value="137">Polygon Mainnet</option>
-				<option value="56">BSC Mainnet</option>
-			</select>
-			<div id="walletInfo" class="wallet-info">
-				<!-- 钱包信息将在这里显示 -->
-			</div>
+			<div id="walletInfo"></div>
 		</div>
 
 		<script>
@@ -243,24 +242,21 @@
 					this.historyList = document.getElementById('historyList');
 					this.connectWallet = document.getElementById('connectWallet');
 					this.walletInfo = document.getElementById('walletInfo');
-					this.networkSelect = document.getElementById('networkSelect');
-					this.currentAccount = null;
+
+					// 加密货币映射表
+					this.cryptoMap = {
+						比特币: 'BTC',
+						以太坊: 'ETH',
+						泰达币: 'USDT',
+						币安币: 'BNB',
+						索拉纳: 'SOL',
+					};
 
 					this.initializeEventListeners();
 					this.checkWalletConnection();
 				}
 
-				async checkWalletConnection() {
-					if (typeof window.ethereum !== 'undefined') {
-						const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-						if (accounts.length > 0) {
-							this.handleAccountsChanged(accounts);
-						}
-					}
-				}
-
 				initializeEventListeners() {
-					// 发送消息
 					this.sendButton.addEventListener('click', () => this.sendMessage());
 					this.messageInput.addEventListener('keypress', (e) => {
 						if (e.key === 'Enter' && !e.shiftKey) {
@@ -269,7 +265,6 @@
 						}
 					});
 
-					// 快捷问题
 					document.querySelectorAll('.quick-question').forEach((button) => {
 						button.addEventListener('click', () => {
 							this.messageInput.value = button.dataset.question;
@@ -277,45 +272,129 @@
 						});
 					});
 
-					// 钱包连接
 					this.connectWallet.addEventListener('click', () => this.connectWalletHandler());
+				}
 
-					// 网络切换
-					this.networkSelect.addEventListener('change', (e) => this.switchNetwork(e.target.value));
+				// 处理加密货币名称转换
+				processCryptoMessage(message) {
+					let processedMessage = message;
+					Object.entries(this.cryptoMap).forEach(([name, code]) => {
+						const regex = new RegExp(name, 'g');
+						processedMessage = processedMessage.replace(regex, code);
+					});
+					return processedMessage;
 				}
 
 				async sendMessage() {
 					const message = this.messageInput.value.trim();
 					if (!message) return;
 
-					// 添加用户消息到聊天
+					// 处理消息中的加密货币名称
+					const processedMessage = this.processCryptoMessage(message);
+
 					this.addMessage(message, 'user');
 					this.messageInput.value = '';
-
-					// 显示加载状态
-					this.loading.classList.add('active');
+					this.loading.style.display = 'block';
 
 					try {
 						const response = await fetch('http://localhost:3000/query', {
 							method: 'POST',
-							headers: {
-								'Content-Type': 'application/json',
-							},
-							body: JSON.stringify({ input: message }),
+							headers: { 'Content-Type': 'application/json' },
+							body: JSON.stringify({ input: processedMessage }),
 						});
 
 						const data = await response.json();
 
-						// 添加响应到聊天
-						this.addMessage(data.output, 'bot');
+						if (data.type === 'staking_pools') {
+							this.renderStakingPools(data);
+						} else if (data.type === 'crypto_price') {
+							this.renderCryptoPrice(data);
+						} else {
+							this.addMessage(data.output, 'bot');
+						}
 
-						// 添加到历史记录
-						this.addToHistory(message, data.output);
+						this.addToHistory(message);
 					} catch (error) {
+						console.error('Error:', error);
 						this.addMessage('抱歉，处理您的请求时出现错误', 'bot');
 					} finally {
-						this.loading.classList.remove('active');
+						this.loading.style.display = 'none';
 					}
+				}
+
+				renderStakingPools(data) {
+					const messageDiv = document.createElement('div');
+					messageDiv.className = 'message bot-message';
+					messageDiv.innerHTML = this.formatStakingPoolsHtml(data.output);
+					this.chatHistory.appendChild(messageDiv);
+					this.chatHistory.scrollTop = this.chatHistory.scrollHeight;
+				}
+
+				renderCryptoPrice(data) {
+					const messageDiv = document.createElement('div');
+					messageDiv.className = 'message bot-message';
+					messageDiv.innerHTML = this.formatCryptoPriceHtml(data.output);
+					this.chatHistory.appendChild(messageDiv);
+					this.chatHistory.scrollTop = this.chatHistory.scrollHeight;
+				}
+
+				formatStakingPoolsHtml(output) {
+					// 将文本格式的输出转换为HTML表格
+					const lines = output.split('\n');
+					let html = '<div class="pools-container">';
+					html += '<table class="pools-table">';
+					html += '<thead><tr><th>池子</th><th>APY</th><th>总供应量</th><th>风险</th></tr></thead>';
+					html += '<tbody>';
+
+					let currentPool = null;
+					lines.forEach((line) => {
+						if (line.endsWith(':') && !line.startsWith('-')) {
+							currentPool = {
+								name: line.slice(0, -1),
+							};
+						} else if (line.startsWith('- 当前 APY:')) {
+							currentPool.apy = line.match(/[\d.]+/)[0];
+						} else if (line.startsWith('- TVL')) {
+							currentPool.tvl = line.match(/\$[\d,]+/)[0];
+						} else if (line.startsWith('- 风险')) {
+							currentPool.risk = line.split(': ')[1];
+							// 添加完整的池子信息
+							html += `
+                   <tr>
+                       <td>${currentPool.name}</td>
+                       <td class="apy">${currentPool.apy}%</td>
+                       <td>${currentPool.tvl}</td>
+                       <td>${currentPool.risk}</td>
+                   </tr>
+               `;
+						}
+					});
+
+					html += '</tbody></table>';
+					html += '</div>';
+					return html;
+				}
+
+				formatCryptoPriceHtml(output) {
+					const lines = output.split('\n');
+					console.log('lines: ', lines);
+					let html = '<div class="crypto-price">';
+
+					lines.forEach((line) => {
+						if (line.includes('实时行情')) {
+							html += `<h3>${line}</h3>`;
+						} else if (line.includes('当前价格')) {
+							html += `<div class="price-main">${line}</div>`;
+						} else if (line.includes('24h变化')) {
+							const isPositive = line.includes('↑');
+							html += `<div class="price-change ${isPositive ? 'positive' : 'negative'}">${line}</div>`;
+						} else if (line) {
+							html += `<div class="price-info">${line}</div>`;
+						}
+					});
+
+					html += '</div>';
+					return html;
 				}
 
 				addMessage(content, type) {
@@ -326,12 +405,12 @@
 					this.chatHistory.scrollTop = this.chatHistory.scrollHeight;
 				}
 
-				addToHistory(question, answer) {
+				addToHistory(message) {
 					const historyItem = document.createElement('div');
 					historyItem.className = 'history-item';
-					historyItem.textContent = question;
+					historyItem.textContent = message;
 					historyItem.addEventListener('click', () => {
-						this.messageInput.value = question;
+						this.messageInput.value = message;
 						this.sendMessage();
 					});
 					this.historyList.insertBefore(historyItem, this.historyList.firstChild);
@@ -343,7 +422,12 @@
 							const accounts = await window.ethereum.request({
 								method: 'eth_requestAccounts',
 							});
-							this.handleAccountsChanged(accounts);
+							const address = accounts[0];
+							this.walletInfo.innerHTML = `
+                   <p>已连接钱包</p>
+                   <p>${address.slice(0, 6)}...${address.slice(-4)}</p>
+               `;
+							this.connectWallet.style.display = 'none';
 						} catch (error) {
 							console.error('连接钱包失败:', error);
 						}
@@ -352,62 +436,20 @@
 					}
 				}
 
-				handleAccountsChanged(accounts) {
-					if (accounts.length === 0) {
-						this.walletInfo.style.display = 'none';
-						this.connectWallet.style.display = 'block';
-						this.currentAccount = null;
-					} else {
-						this.currentAccount = accounts[0];
-						this.walletInfo.innerHTML = `
-                       <p>已连接钱包</p>
-                       <p>${this.currentAccount.slice(0, 6)}...${this.currentAccount.slice(-4)}</p>
-                   `;
-						this.connectWallet.style.display = 'none';
-						this.updateNetwork();
-					}
-				}
-
-				async updateNetwork() {
-					try {
-						const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-						this.networkSelect.value = parseInt(chainId, 16).toString();
-					} catch (error) {
-						console.error('获取网络信息失败:', error);
-					}
-				}
-
-				async switchNetwork(networkId) {
-					const networks = {
-						1: {
-							chainId: '0x1',
-							name: 'Ethereum Mainnet',
-						},
-						137: {
-							chainId: '0x89',
-							name: 'Polygon Mainnet',
-						},
-						56: {
-							chainId: '0x38',
-							name: 'BSC Mainnet',
-						},
-					};
-
-					const network = networks[networkId];
-					if (!network) return;
-
-					try {
-						await window.ethereum.request({
-							method: 'wallet_switchEthereumChain',
-							params: [{ chainId: network.chainId }],
-						});
-					} catch (error) {
-						console.error('切换网络失败:', error);
+				async checkWalletConnection() {
+					if (typeof window.ethereum !== 'undefined') {
+						const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+						if (accounts.length > 0) {
+							this.walletInfo.innerHTML = `
+                   <p>已连接钱包</p>
+                   <p>${accounts[0].slice(0, 6)}...${accounts[0].slice(-4)}</p>
+               `;
+							this.connectWallet.style.display = 'none';
+						}
 					}
 				}
 			}
 
-			// 初始化应用
 			document.addEventListener('DOMContentLoaded', () => {
 				new ChatApp();
 			});

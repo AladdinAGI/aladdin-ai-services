@@ -2,16 +2,25 @@ import { CryptoAgent } from '../agents/crypto.agent';
 import { DeFiAgent } from '../agents/defi.agent';
 import { OpenAIService } from './openai.service';
 import { AgentResponse } from '../types';
+import { ChatOpenAI } from '@langchain/openai';
+import { routerPrompt } from '../prompts/templates';
 
 export class AgentService {
 	private cryptoAgent: CryptoAgent;
 	private defiAgent: DeFiAgent;
 	private openaiService: OpenAIService;
+	private routerModel: ChatOpenAI;
 
 	constructor(openAIApiKey: string) {
 		this.cryptoAgent = new CryptoAgent(openAIApiKey);
 		this.defiAgent = new DeFiAgent(openAIApiKey);
 		this.openaiService = new OpenAIService(openAIApiKey);
+
+		this.routerModel = new ChatOpenAI({
+			openAIApiKey,
+			temperature: 0,
+			modelName: 'gpt-3.5-turbo',
+		});
 	}
 
 	async initialize() {
@@ -20,33 +29,34 @@ export class AgentService {
 
 	async query(input: string): Promise<AgentResponse> {
 		try {
-			const normalizedInput = input.toLowerCase();
+			const routerResponse = await this.routerModel.invoke(
+				await routerPrompt.format({
+					input: input,
+				}),
+			);
 
-			// 首先检查是否是质押相关查询
-			if (
-				normalizedInput.includes('推荐一些') ||
-				normalizedInput.includes('收益') ||
-				normalizedInput.includes('apy') ||
-				normalizedInput.includes('稳定币')
-			) {
-				return await this.defiAgent.query(input);
-			}
-			// 然后检查是否是价格相关查询
-			else if (
-				normalizedInput.includes('价格') ||
-				normalizedInput.includes('比特币') ||
-				(normalizedInput.includes('币') && !normalizedInput.includes('稳定币'))
-			) {
-				return await this.cryptoAgent.query(input);
-			} else if (normalizedInput.includes('你是谁')) {
-				return {
-					output: '我是Aladdin AI机器人🤖',
-				};
-			}
-			// 默认使用 OpenAI
-			else {
-				const response = await this.openaiService.query(input);
-				return { output: response };
+			const route = String(routerResponse.content).trim();
+
+			switch (route) {
+				case 'CRYPTO':
+					const cryptoResponse = await this.cryptoAgent.query(input);
+					return {
+						output: cryptoResponse.output,
+						type: 'crypto_price',
+					};
+				case 'DEFI':
+					const defiResponse = await this.defiAgent.query(input);
+					return {
+						output: defiResponse.output,
+						type: 'staking_pools',
+					};
+				case 'IDENTITY':
+					return {
+						output: '我是Aladdin AI机器人🤖',
+					};
+				default:
+					// const response = await this.openaiService.query(input);
+					return { output: '我是专注给您进稳定币投资的机器人，不能回答您其他问题' };
 			}
 		} catch (error) {
 			return {

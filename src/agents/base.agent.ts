@@ -2,7 +2,7 @@
 import { AgentExecutor, createReactAgent } from 'langchain/agents';
 import { ChatOpenAI } from '@langchain/openai';
 import { Tool } from '@langchain/core/tools';
-import { ChatPromptTemplate } from '@langchain/core/prompts';
+import { basePromptTemplate } from '../prompts/templates';
 
 export abstract class BaseAgent {
 	protected model: ChatOpenAI;
@@ -24,29 +24,7 @@ export abstract class BaseAgent {
 	}
 
 	protected async baseInitialize(systemPrompt: string) {
-		const prompt = ChatPromptTemplate.fromMessages([
-			[
-				'system',
-				`你是一个AI助手。使用以下工具来帮助解决问题：
-{tool_names}
-
-工具详细说明：
-{tools}
-
-使用格式：
-Thought: 让我思考如何解决这个问题
-Action: 要使用的工具名称
-Action Input: 要传递给工具的输入
-Observation: 工具的输出
-... (可以有多轮思考和行动)
-Thought: 我现在知道答案了
-Final Answer: 最终答案（用中文回答）
-
-${systemPrompt}`,
-			],
-			['human', '{input}'],
-			['assistant', '{agent_scratchpad}'],
-		]);
+		const prompt = basePromptTemplate(systemPrompt);
 
 		const agent = await createReactAgent({
 			llm: this.model,
