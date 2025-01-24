@@ -13,8 +13,13 @@ const router = new Router();
 const port = 3000;
 
 // 创建 AgentService 实例
-const agentService = new AgentService(process.env.OPENAI_API_KEY || '');
 
+const OPENAI_API_KEY2 = `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`;
+const agentService = new AgentService({
+	openAIApiKey: process.env.OPENAI_API_KEY || OPENAI_API_KEY2,
+	etherscanApiKey: 'NSZCD6S4TKVWRS13PMQFMVTNP6H7NAGHUY',
+	rpcUrl: 'https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
+});
 // 初始化 agents
 agentService.initialize().catch(console.error);
 

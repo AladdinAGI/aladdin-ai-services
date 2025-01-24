@@ -126,10 +126,10 @@ export abstract class BaseAgent {
 				agent_scratchpad: '',
 				tool_names: this.tools.map((tool) => tool.name).join(', '),
 			});
-
+			console.log('🐻🐻🐻🐻🐻🐻 Intermediate Steps:', result.intermediateSteps);
 			// 尝试从 intermediateSteps 中获取 morpho_pools 工具的输出
 			const morphoStep = result.intermediateSteps?.find((step: any) => step.action?.tool === 'morpho_pools');
-			console.log('morphoStep:🐻🐻🐻🐻🐻 ', result);
+			console.log('morphoStep:🐻🐻🐻🐻🐻 ', morphoStep);
 
 			if (morphoStep?.observation) {
 				return {

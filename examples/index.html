@@ -3,7 +3,11 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>AI Agent 助手</title>
+		<title>加密货币 AI 助手</title>
+		<!-- 添加必要的依赖 -->
+
+		<script src="https://code.highcharts.com/highcharts.js"></script>
+		<script src="https://code.highcharts.com/modules/accessibility.js"></script>
 		<style>
 			/* 基础样式 */
 			* {
@@ -76,46 +80,43 @@
 				border: 1px solid #eee;
 			}
 
-			/* 质押池表格样式 */
-			.pools-table {
-				width: 100%;
-				border-collapse: collapse;
-				margin: 10px 0;
+			/* 加密货币相关样式 */
+			.crypto-chart-container {
 				background: white;
 				border-radius: 8px;
-				overflow: hidden;
-				box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+				padding: 16px;
+				margin-top: 16px;
+				box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 			}
 
-			.pools-table th,
-			.pools-table td {
-				padding: 12px;
-				text-align: left;
-				border-bottom: 1px solid #eee;
+			.crypto-price {
+				background: white;
+				border-radius: 8px;
+				padding: 16px;
 			}
 
-			.pools-table th {
-				background: #f8f9fa;
-				font-weight: 600;
-			}
-
-			.pools-table .apy {
-				color: #28a745;
+			.price-main {
+				font-size: 24px;
 				font-weight: bold;
+				margin: 8px 0;
 			}
 
-			.stake-button {
-				display: inline-block;
-				padding: 6px 12px;
-				background: #007bff;
-				color: white;
-				text-decoration: none;
-				border-radius: 4px;
-				font-size: 0.9em;
+			.price-change {
+				font-size: 16px;
+				margin: 8px 0;
 			}
 
-			.stake-button:hover {
-				background: #0056b3;
+			.price-change.positive {
+				color: #28a745;
+			}
+
+			.price-change.negative {
+				color: #dc3545;
+			}
+
+			.price-info {
+				color: #6c757d;
+				margin: 4px 0;
 			}
 
 			/* 快捷问题区域 */
@@ -202,6 +203,57 @@
 			.loading.active {
 				display: block;
 			}
+			.security-analysis {
+				background: white;
+				border-radius: 8px;
+				padding: 20px;
+				margin-top: 16px;
+			}
+
+			.security-header {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				margin-bottom: 16px;
+			}
+
+			.risk-badge {
+				padding: 6px 12px;
+				border-radius: 4px;
+				font-weight: bold;
+			}
+
+			.risk-HIGH {
+				background: #dc3545;
+				color: white;
+			}
+
+			.risk-MEDIUM {
+				background: #ffc107;
+				color: black;
+			}
+
+			.risk-LOW {
+				background: #28a745;
+				color: white;
+			}
+
+			.security-details {
+				border: 1px solid #eee;
+				border-radius: 8px;
+				margin-top: 16px;
+			}
+
+			.detail-item {
+				padding: 12px;
+				border-bottom: 1px solid #eee;
+				display: flex;
+				justify-content: space-between;
+			}
+
+			.detail-item:last-child {
+				border-bottom: none;
+			}
 		</style>
 	</head>
 	<body>
@@ -214,6 +266,7 @@
 			<div class="quick-questions">
 				<button class="quick-question" data-question="比特币的当前价格是多少？">比特币价格</button>
 				<button class="quick-question" data-question="推荐一些稳定币质押方案">推荐质押方案</button>
+				<button class="quick-question" data-question="检查合约地址安全性">检查合约安全</button>
 				<button class="quick-question" data-question="你是谁？">关于AI助手</button>
 			</div>
 
@@ -231,8 +284,56 @@
 			<button id="connectWallet" class="wallet-connect">连接钱包</button>
 			<div id="walletInfo"></div>
 		</div>
-
+		<!-- 在 body 标签结束前添加以下脚本 -->
 		<script>
+			// 价格图表组件
+			const CryptoPriceChart = ({ data, symbol }) => {
+				const { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } = Recharts;
+
+				const formatPrice = (value) => {
+					return new Intl.NumberFormat('en-US', {
+						style: 'currency',
+						currency: 'USD',
+						minimumFractionDigits: 2,
+						maximumFractionDigits: 2,
+					}).format(value);
+				};
+
+				const formatDate = (dateStr) => {
+					const date = new Date(dateStr);
+					return `${date.getMonth() + 1}/${date.getDate()}`;
+				};
+
+				return React.createElement('div', { className: 'crypto-chart-container' }, [
+					React.createElement('h3', { className: 'text-lg font-semibold mb-4' }, `${symbol} 价格走势`),
+					React.createElement(
+						ResponsiveContainer,
+						{ width: '100%', height: 400 },
+						React.createElement(
+							LineChart,
+							{ data: data, margin: { top: 5, right: 30, left: 20, bottom: 5 } },
+							[
+								React.createElement(CartesianGrid, { strokeDasharray: '3 3' }),
+								React.createElement(XAxis, { dataKey: 'date', tickFormatter: formatDate }),
+								React.createElement(YAxis, { tickFormatter: formatPrice }),
+								React.createElement(Tooltip, {
+									formatter: (value) => formatPrice(value),
+									labelFormatter: (date) => new Date(date).toLocaleDateString(),
+								}),
+								React.createElement(Legend),
+								React.createElement(Line, {
+									type: 'monotone',
+									dataKey: 'close',
+									stroke: '#8884d8',
+									dot: false,
+									name: '价格',
+								}),
+							],
+						),
+					),
+				]);
+			};
+
 			class ChatApp {
 				constructor() {
 					this.messageInput = document.getElementById('messageInput');
@@ -283,6 +384,52 @@
 					return processedMessage;
 				}
 
+				renderContractSecurity(data) {
+					const messageDiv = document.createElement('div');
+					messageDiv.className = 'message bot-message';
+
+					try {
+						const securityData = typeof data.output === 'string' ? JSON.parse(data.output) : data.output;
+
+						const securityContainer = document.createElement('div');
+						securityContainer.className = 'security-analysis';
+
+						// 构建安全分析 UI
+						securityContainer.innerHTML = `
+                <div class="security-header">
+                    <h3>合约安全分析报告</h3>
+                    <span class="risk-badge risk-${securityData.riskLevel}">${securityData.riskLevel}</span>
+                </div>
+                <div class="security-details">
+                    <div class="detail-item">
+                        <span>合约名称</span>
+                        <span>${securityData.contractName || 'Unknown'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span>源码验证</span>
+                        <span>${securityData.isVerified ? '✅ 已验证' : '❌ 未验证'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span>风险特征</span>
+                        <span>${securityData.risks.length ? securityData.risks.join(', ') : '未发现'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span>交易分析</span>
+                        <span>${securityData.txCount ? `${securityData.txCount} 笔交易` : '无交易记录'}</span>
+                    </div>
+                </div>
+            `;
+
+						messageDiv.appendChild(securityContainer);
+					} catch (e) {
+						console.error('解析安全数据失败:', e);
+						messageDiv.textContent = '无法显示安全分析数据';
+					}
+
+					this.chatHistory.appendChild(messageDiv);
+					this.chatHistory.scrollTop = this.chatHistory.scrollHeight;
+				}
+
 				async sendMessage() {
 					const message = this.messageInput.value.trim();
 					if (!message) return;
@@ -301,21 +448,18 @@
 
 						const data = await response.json();
 
-						if (data.type === 'staking_pools') {
-							// 解析 JSON 字符串
-							let poolsData;
-							try {
-								// 如果 output 是字符串，尝试解析它
-								poolsData = typeof data.output === 'string' ? JSON.parse(data.output) : data.output;
-							} catch (e) {
-								console.error('JSON 解析错误:', e);
-								poolsData = data.output;
-							}
-							this.renderStakingPools(poolsData);
-						} else if (data.type === 'crypto_price') {
-							this.renderCryptoPrice(data);
-						} else {
-							this.addMessage(data.output, 'bot');
+						switch (data.type) {
+							case 'staking_pools':
+								const vaultsElement = this.renderContractSecurity(data);
+								break;
+							case 'crypto_trend':
+								this.renderCryptoTrend(data);
+								break;
+							case 'crypto_price':
+								this.renderCryptoPrice(data);
+								break;
+							default:
+								this.addMessage(data.output, 'bot');
 						}
 
 						this.addToHistory(message);
@@ -326,82 +470,220 @@
 						this.loading.style.display = 'none';
 					}
 				}
-
-				renderStakingPools(data) {
+				renderContractSecurity(data) {
 					const messageDiv = document.createElement('div');
 					messageDiv.className = 'message bot-message';
-					messageDiv.innerHTML = this.formatStakingPoolsHtml(data);
+
+					try {
+						const securityData = typeof data.output === 'string' ? JSON.parse(data.output) : data.output;
+
+						const securityContainer = document.createElement('div');
+						securityContainer.className = 'security-analysis';
+
+						securityContainer.innerHTML = `
+     <table style="width:100%; border-collapse:collapse; margin-top:16px; background:white; border-radius:8px; overflow:hidden">
+       <thead>
+         <tr style="background:#f8f9fa; height:48px">
+           <th style="padding:12px; text-align:left; font-weight:600; border-bottom:1px solid #dee2e6">Vault名称</th>
+           <th style="padding:12px; text-align:center; font-weight:600; border-bottom:1px solid #dee2e6">代币</th>
+           <th style="padding:12px; text-align:right; font-weight:600; border-bottom:1px solid #dee2e6">APY</th>
+           <th style="padding:12px; text-align:right; font-weight:600; border-bottom:1px solid #dee2e6">总质押量</th>
+           <th style="padding:12px; text-align:center; font-weight:600; border-bottom:1px solid #dee2e6">风险</th>
+           <th style="padding:12px; text-align:left; font-weight:600; border-bottom:1px solid #dee2e6">合约地址</th>
+         </tr>
+       </thead>
+       <tbody>
+         ${securityData.data
+				.map(
+					(vault) => `
+           <tr style="border-bottom:1px solid #dee2e6">
+             <td style="padding:16px 12px; font-weight:500">${vault.vaultName}</td>
+             <td style="padding:16px 12px; text-align:center">${vault.token}</td>
+             <td style="padding:16px 12px; text-align:right; color:#28a745; font-weight:500">${vault.apy}%</td>
+             <td style="padding:16px 12px; text-align:right">${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(vault.totalSupply)}</td>
+             <td style="padding:16px 12px; text-align:center">
+               <span style="padding:4px 8px; border-radius:4px; font-size:12px; background-color:${vault.risk === '低风险' ? '#dcf5e4' : '#fff3cd'}; color:${vault.risk === '低风险' ? '#0d6832' : '#997404'}">
+                 ${vault.risk}
+               </span>
+             </td>
+             <td style="padding:16px 12px; color:#6c757d; font-family:monospace">${vault.contractAddress.slice(0, 6)}...${vault.contractAddress.slice(-4)}</td>
+           </tr>
+         `,
+				)
+				.join('')}
+       </tbody>
+     </table>
+   `;
+
+						messageDiv.appendChild(securityContainer);
+					} catch (e) {
+						console.error('解析数据失败:', e);
+						messageDiv.textContent = '无法显示数据';
+					}
+
 					this.chatHistory.appendChild(messageDiv);
 					this.chatHistory.scrollTop = this.chatHistory.scrollHeight;
 				}
+				renderCryptoTrend(data) {
+					const messageDiv = document.createElement('div');
+					messageDiv.className = 'message bot-message';
 
-				formatStakingPoolsHtml(data) {
-					// 检查数据格式是否正确
-					if (!Array.isArray(data.data)) {
-						return '<p>无法获取质押池数据</p>';
-					}
+					const chartContainer = document.createElement('div');
+					messageDiv.appendChild(chartContainer);
 
-					let html = '<div class="pools-container">';
-					html += '<table class="pools-table">';
-					html += `
-            <thead>
-                <tr>
-                    <th>池子</th>
-                    <th>币种</th>
-                    <th>APY</th>
-                    <th>总供应量</th>
-                    <th>风险</th>
-                    <th>详情</th>
-                </tr>
-            </thead>
-            <tbody>
-        `;
+					const root = ReactDOM.createRoot(chartContainer);
+					root.render(
+						React.createElement(CryptoPriceChart, {
+							data: data.output.priceData,
+							symbol: data.output.symbol,
+						}),
+					);
 
-					data.data.forEach((pool) => {
-						html += `
-                <tr>
-                    <td>${pool.name}</td>
-                    <td>${pool.token}</td>
-                    <td class="apy">${pool.apy}%</td>
-                    <td>$${pool.tvl.toLocaleString()}</td>
-                    <td>${pool.risk}</td>
-                    <td>${pool.details}</td>
-                </tr>
-            `;
-					});
-
-					html += '</tbody></table>';
-					html += '</div>';
-					return html;
+					this.chatHistory.appendChild(messageDiv);
+					this.chatHistory.scrollTop = this.chatHistory.scrollHeight;
 				}
 
 				renderCryptoPrice(data) {
 					const messageDiv = document.createElement('div');
 					messageDiv.className = 'message bot-message';
-					messageDiv.innerHTML = this.formatCryptoPriceHtml(data.output);
+
+					try {
+						const parsedData = typeof data.output === 'string' ? JSON.parse(data.output) : data.output;
+
+						// 创建价格显示容器
+						const priceContainer = document.createElement('div');
+						priceContainer.className = 'crypto-price';
+						priceContainer.innerHTML = `
+            <h3>${parsedData.symbol} 实时行情</h3>
+            <div class="price-main">${parsedData.formattedPrice}</div>
+            <div class="price-info">最后更新: ${new Date(parsedData.lastUpdated).toLocaleString()}</div>
+        `;
+						messageDiv.appendChild(priceContainer);
+
+						// 如果有历史数据，创建图表
+						if (parsedData.history && parsedData.history.length > 0) {
+							const chartContainer = document.createElement('div');
+							chartContainer.style.height = '400px';
+							chartContainer.style.marginTop = '20px';
+							messageDiv.appendChild(chartContainer);
+
+							// 处理数据
+							const chartData = parsedData.history.map((item) => [
+								new Date(item.date).getTime(),
+								item.close,
+							]);
+
+							// 创建图表
+							Highcharts.chart(chartContainer, {
+								chart: {
+									type: 'line',
+									style: {
+										fontFamily: 'Arial, sans-serif',
+									},
+								},
+								title: {
+									text: `${parsedData.symbol} 7天价格走势`,
+									style: {
+										fontSize: '16px',
+									},
+								},
+								xAxis: {
+									type: 'datetime',
+									labels: {
+										format: '{value:%m/%d}',
+									},
+								},
+								yAxis: {
+									title: {
+										text: '价格 (USD)',
+									},
+									labels: {
+										formatter: function () {
+											return '$' + Highcharts.numberFormat(this.value, 0, '.', ',');
+										},
+									},
+								},
+								legend: {
+									enabled: false,
+								},
+								tooltip: {
+									formatter: function () {
+										return (
+											'<b>' +
+											Highcharts.dateFormat('%Y-%m-%d', this.x) +
+											'</b><br/>' +
+											'价格: $' +
+											Highcharts.numberFormat(this.y, 2, '.', ',')
+										);
+									},
+								},
+								series: [
+									{
+										name: '价格',
+										data: chartData,
+										color: '#007bff',
+										marker: {
+											enabled: false,
+										},
+									},
+								],
+								plotOptions: {
+									series: {
+										lineWidth: 2,
+									},
+								},
+							});
+
+							// 添加统计信息
+							const prices = parsedData.history.map((item) => item.close);
+							const firstPrice = prices[0];
+							const lastPrice = prices[prices.length - 1];
+							const priceChange = (((lastPrice - firstPrice) / firstPrice) * 100).toFixed(2);
+							const maxPrice = Math.max(...prices);
+							const minPrice = Math.min(...prices);
+
+							const statsContainer = document.createElement('div');
+							statsContainer.style.display = 'flex';
+							statsContainer.style.justifyContent = 'space-between';
+							statsContainer.style.marginTop = '20px';
+							statsContainer.style.padding = '15px';
+							statsContainer.style.backgroundColor = '#f8f9fa';
+							statsContainer.style.borderRadius = '8px';
+							statsContainer.style.textAlign = 'center'; // 添加居中对齐
+
+							const commonLabelStyle = 'color: #666; font-size: 14px; margin-bottom: 8px;'; // 添加底部间距
+							const commonValueStyle = 'font-size: 16px; font-weight: bold; white-space: nowrap;'; // 保持数值为一行
+
+							statsContainer.innerHTML = `
+						<div style="flex: 1; padding: 0 10px;">
+							<div style="${commonLabelStyle}">7天涨跌</div>
+							<div style="${commonValueStyle}; color: ${priceChange >= 0 ? '#28a745' : '#dc3545'};">
+								${priceChange}%
+							</div>
+						</div>
+						<div style="flex: 1; padding: 0 10px; border-left: 1px solid #dee2e6; border-right: 1px solid #dee2e6;">
+							<div style="${commonLabelStyle}">最高价</div>
+							<div style="${commonValueStyle}; color: #28a745;">
+								$${Highcharts.numberFormat(maxPrice, 0, '.', ',')}
+							</div>
+						</div>
+						<div style="flex: 1; padding: 0 10px;">
+							<div style="${commonLabelStyle}">最低价</div>
+							<div style="${commonValueStyle}; color: #dc3545;">
+								$${Highcharts.numberFormat(minPrice, 0, '.', ',')}
+							</div>
+						</div>
+					`;
+
+							messageDiv.appendChild(statsContainer);
+						}
+					} catch (e) {
+						console.error('解析价格数据失败:', e);
+						messageDiv.textContent = '无法显示价格数据';
+					}
+
 					this.chatHistory.appendChild(messageDiv);
 					this.chatHistory.scrollTop = this.chatHistory.scrollHeight;
-				}
-
-				formatCryptoPriceHtml(output) {
-					const lines = output.split('\n');
-					let html = '<div class="crypto-price">';
-
-					lines.forEach((line) => {
-						if (line.includes('实时行情')) {
-							html += `<h3>${line}</h3>`;
-						} else if (line.includes('当前价格')) {
-							html += `<div class="price-main">${line}</div>`;
-						} else if (line.includes('24h变化')) {
-							const isPositive = line.includes('↑');
-							html += `<div class="price-change ${isPositive ? 'positive' : 'negative'}">${line}</div>`;
-						} else if (line) {
-							html += `<div class="price-info">${line}</div>`;
-						}
-					});
-
-					html += '</div>';
-					return html;
 				}
 
 				addMessage(content, type) {
@@ -455,7 +737,15 @@
 						}
 					}
 				}
+
+				formatNumber(number) {
+					return new Intl.NumberFormat('en-US', {
+						maximumFractionDigits: 0,
+					}).format(number);
+				}
 			}
+
+			// 初始化应用
 			document.addEventListener('DOMContentLoaded', () => {
 				new ChatApp();
 			});

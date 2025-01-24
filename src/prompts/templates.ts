@@ -30,10 +30,11 @@ export const basePromptTemplate = (systemPrompt: string) => {
 export const routerPrompt = ChatPromptTemplate.fromTemplate(`
   分析用户的问题,并确定合适的处理方式:
   1. 如果是关于加密货币价格、市场、走势的问题,返回: CRYPTO
-  2. 如果是关于质押、投资建议、收益率的问题,返回: DEFI
-  3. 如果是询问你是谁,返回: IDENTITY
-  4. 其他问题,返回: GENERAL
-
+  2. 如果是关于质押、投资建议、收益率的问题,返回: DEFI 
+  3. 如果是询问合约安全性、貔貅特征的问题,返回: SECURITY
+  4. 如果是询问你是谁,返回: IDENTITY
+  5. 其他问题,返回: DEFAULT
+  
   用户问题: {input}
-  仅返回: CRYPTO, DEFI, IDENTITY 或 GENERAL
-`);
+  
+  仅返回: CRYPTO, DEFI, SECURITY, IDENTITY 或 DEFAULT`);
