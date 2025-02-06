@@ -3,56 +3,103 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Crypto Assistant</title>
+		<title>Aladdin App Demo</title>
 		<link rel="stylesheet" href="styles.css" />
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
 	</head>
 	<body>
+		<!-- 头部导航 -->
+		<header class="app-header">
+			<div class="header-left">
+				<h1>Aladdin</h1>
+				<nav>
+					<a href="#" class="active">首页</a>
+					<a href="#">质押</a>
+					<a href="#">行情</a>
+				</nav>
+			</div>
+			<div class="header-right">
+				<button id="connectWallet" class="connect-btn">连接钱包</button>
+			</div>
+		</header>
+
 		<div class="container">
-			<!-- 左侧历史记录 -->
-			<div class="history-panel">
+			<!-- 左侧列表面板 -->
+			<div class="left-panel">
 				<div class="history-header">
-					<h2>历史记录</h2>
+					<h2>历史问题</h2>
 				</div>
-				<div class="history-list" id="historyList"></div>
+				<div class="history-list" id="historyList">
+					<!-- 历史问题将通过JS动态添加 -->
+				</div>
 			</div>
 
 			<!-- 中间聊天区域 -->
 			<div class="chat-panel">
-				<div class="chat-header">
-					<h2>AI 加密助手</h2>
-				</div>
 				<div class="chat-messages" id="chatMessages">
-					<!-- AI的欢迎消息 -->
 					<div class="message ai">
 						<div class="avatar">AI</div>
 						<div class="message-content">
-							👋 您好！我是AI加密助手，以下是我可以帮您查询的内容：
+							👋 您好！我是 Aladdin AI 助手，可以帮您：
 							<div id="helpContent"></div>
 						</div>
 					</div>
 				</div>
 				<div class="chat-input">
 					<input type="text" id="messageInput" placeholder="输入您的问题..." />
-					<button onclick="sendMessage()">发送</button>
+					<button id="sendButton">发送</button>
 				</div>
 			</div>
 
-			<!-- 右侧钱包连接区域 -->
-			<div class="wallet-panel">
-				<div class="wallet-header">
-					<h2>钱包连接</h2>
-				</div>
-				<div class="wallet-content">
-					<button id="connectWallet" class="wallet-connect-btn">连接钱包</button>
-					<div id="walletInfo" class="wallet-info hidden">
-						<p>钱包地址：<span id="walletAddress"></span></p>
-						<p>ETH余额：<span id="ethBalance"></span></p>
+			<!-- 右侧数据面板 -->
+			<!-- 右侧数据面板 -->
+			<div class="right-panel">
+				<div class="stats-section">
+					<h2>我的质押</h2>
+					<div class="stats-grid">
+						<div class="stat-card main-stat">
+							<h3>总质押金额</h3>
+							<div class="amount">$3,000.00</div>
+						</div>
+						<div class="stats-row">
+							<div class="stat-card sub-stat">
+								<h3>累计收益</h3>
+								<div class="amount">$36.30</div>
+							</div>
+							<div class="stat-card sub-stat">
+								<h3>平均年化</h3>
+								<div class="amount">5.06%</div>
+							</div>
+						</div>
 					</div>
+				</div>
+
+				<!-- 质押分布饼图 -->
+				<div class="chart-section">
+					<div class="chart-header">
+						<h2>质押分布</h2>
+					</div>
+					<div id="stakingDistribution" class="chart"></div>
+				</div>
+
+				<!-- 收益走势图 -->
+				<div class="chart-section">
+					<div class="chart-header">
+						<h2>每日收益</h2>
+					</div>
+					<div id="earningsChart" class="chart"></div>
+				</div>
+
+				<!-- 平台健康度 -->
+				<div class="chart-section">
+					<div class="chart-header">
+						<h2>平台健康度</h2>
+					</div>
+					<div id="platformHealth" class="chart"></div>
 				</div>
 			</div>
 		</div>
 
-		<script src="./app.js"></script>
+		<script src="app.js"></script>
 	</body>
 </html>

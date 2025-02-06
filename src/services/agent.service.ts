@@ -6,28 +6,34 @@ import { routerPrompt } from '../prompts/templates';
 import { OpenAIService } from './openai.service';
 import { PromptTemplate } from '@langchain/core/prompts';
 
-type RouteType = 'CRYPTO' | 'DEFI' | 'SECURITY' | 'IDENTITY' | 'DEFAULT';
+type RouteType = 'CRYPTO' | 'DEFI' | 'STAKING' | 'SECURITY' | 'IDENTITY' | 'DEFAULT';
 
 const ROUTE_KEYWORDS: Record<RouteType, string[]> = {
 	CRYPTO: ['价格', '币价', '行情', '走势', '涨跌', '价值', '多少钱', '币', '代币', 'token', 'coin'],
-	DEFI: [
+	DEFI: ['流动性', 'swap', '闪兑', '兑换', '交易所', '借贷', 'defi', 'amm', 'dex', 'lending'],
+	STAKING: [
 		'质押',
 		'挖矿',
-		'流动性',
 		'收益率',
 		'apy',
 		'apr',
 		'投资',
 		'理财',
-		'defi',
 		'收益',
 		'利息',
 		'年化',
-		'swap',
-		'闪兑',
-		'兑换',
-		'交易所',
-		'借贷',
+		'staking',
+		'yield',
+		'earn',
+		'savings',
+		'deposit',
+		'usdt',
+		'usdc',
+		'稳定币',
+		'存款',
+		'理财',
+		'活期',
+		'定期',
 	],
 	SECURITY: [
 		'安全',
@@ -44,8 +50,10 @@ const ROUTE_KEYWORDS: Record<RouteType, string[]> = {
 		'跑路',
 		'诈骗',
 		'黑名单',
+		'kyc',
+		'认证',
 	],
-	IDENTITY: ['你是谁', '介绍', '自我介绍', '能做什么', '帮助'],
+	IDENTITY: ['你是谁', '介绍', '自我介绍', '能做什么', '帮助', '指南', '教程'],
 	DEFAULT: [],
 };
 
@@ -62,8 +70,7 @@ interface AgentServiceConfig {
 	etherscanApiKey: string;
 }
 
-// 创建判断是否加密相关的 prompt
-const cryptoCheckPrompt = PromptTemplate.fromTemplate(`判断以下问题是否与加密货币、区块链或Web3相关。
+const cryptoCheckPrompt = PromptTemplate.fromTemplate(`判断以下问题是否与加密货币、区块链、DeFi或稳定币质押相关。
 只需回答 "true" 或 "false"，不要解释。
 
 问题: {input}
@@ -114,7 +121,16 @@ export class AgentService {
 			.replace(/\s+/g, ' ')
 			.trim();
 
+		// 首先检查是否是稳定币质押相关
+		for (const keyword of ROUTE_KEYWORDS.STAKING) {
+			if (input.includes(keyword)) {
+				return 'STAKING';
+			}
+		}
+
+		// 然后检查其他路由
 		for (const [route, keywords] of Object.entries(ROUTE_KEYWORDS)) {
+			if (route === 'STAKING') continue; // 跳过已检查的STAKING
 			for (const keyword of keywords) {
 				if (input.includes(keyword)) {
 					return route as RouteType;
@@ -133,7 +149,6 @@ export class AgentService {
 			return result === 'true';
 		} catch (error) {
 			console.error('Error checking if crypto related:', error);
-			// 出错时保守返回 false
 			return false;
 		}
 	}
@@ -149,6 +164,15 @@ export class AgentService {
 			let response: AgentResponse;
 
 			switch (route) {
+				case 'STAKING': {
+					const stakingResponse = await this.defiAgent.query(input);
+					response = {
+						output: stakingResponse.output,
+						data: stakingResponse.data,
+						type: 'staking_pools',
+					};
+					break;
+				}
 				case 'CRYPTO': {
 					const cryptoResponse = await this.cryptoAgent.query(input);
 					response = {
@@ -163,18 +187,23 @@ export class AgentService {
 					const defiResponse = await this.defiAgent.query(input);
 					response = {
 						output: defiResponse.output,
-						type: 'staking_pools',
+						type: 'defi_general',
 					};
 					break;
 				}
 				case 'IDENTITY':
 					response = {
-						output: '我是 AI 加密货币助手,可以帮您查询币价、分析行情、检查合约安全性,并推荐优质的 DeFi 项目。',
+						output:
+							'我是 AI DeFi 助手，专注于稳定币质押服务。我可以帮您：\n' +
+							'1. 推荐最优质的稳定币质押池\n' +
+							'2. 分析不同平台的收益率和风险\n' +
+							'3. 计算预期收益和投资回报\n' +
+							'4. 指导 CEX 和 DEX 平台的质押操作\n' +
+							'5. 提供市场趋势和安全建议',
 						type: 'identity',
 					};
 					break;
 				default:
-					// 使用 LLM 判断是否是加密货币相关问题
 					if (await this.isCryptoRelated(input)) {
 						console.log('🍊🍊🍊🍊兜底问题🍊🍊🍊🍊');
 						const openAIResponse = await this.openAIService.query(input);
@@ -184,7 +213,7 @@ export class AgentService {
 						};
 					} else {
 						response = {
-							output: '抱歉，我是一个专门的加密货币助手，只能回答与加密货币、区块链相关的问题。请问我有关币价、DeFi项目、合约安全等方面的问题。',
+							output: '抱歉，我是一个专门的 DeFi 质押助手，主要帮助用户进行稳定币质押和收益管理。请问我关于质押、投资、收益等方面的问题。',
 							type: 'non_crypto',
 						};
 					}
