@@ -5,7 +5,6 @@ import Router from '@koa/router';
 import cors from '@koa/cors';
 import bodyParser from 'koa-bodyparser';
 import { AgentService } from './services/agent.service';
-
 dotenv.config();
 
 const app = new Koa();

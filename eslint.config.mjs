@@ -5,7 +5,12 @@ import parser from '@typescript-eslint/parser';
 export default [
 	eslint.configs.recommended,
 	{
-		files: ['src/**/*.{js,ts}'],
+		// 首先定义忽略的文件
+		ignores: ['**/dist/**', '**/examples/**', '**/node_modules/**', '**/coverage/**'],
+	},
+	{
+		// 然后定义要检查的文件
+		files: ['**/*.{js,ts}'], // 匹配所有 js/ts 文件
 		languageOptions: {
 			parser: parser,
 			parserOptions: {
@@ -25,6 +30,5 @@ export default [
 			'@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
 			'no-console': ['warn', { allow: ['warn', 'error', 'log'] }],
 		},
-		ignores: ['dist', 'node_modules', 'coverage'],
 	},
 ];
