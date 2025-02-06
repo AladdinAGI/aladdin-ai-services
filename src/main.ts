@@ -45,6 +45,11 @@ router.post('/query', async (ctx) => {
 	}
 });
 
+router.get('/test', async (ctx) => {
+	ctx.body = {
+		data: 'Hello Aladdin',
+	};
+});
 // 错误处理
 app.on('error', (err, ctx) => {
 	console.error('服务器错误:', err);

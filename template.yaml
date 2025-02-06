@@ -54,15 +54,8 @@ Resources:
                 - !Ref NodeModulesLayer
             Policies:
                 - S3CrudPolicy:
-                      BucketName: mina-community-assets
+                      BucketName: aladdinagi-assets
                 - VPCAccessPolicy: {}
-            VpcConfig:
-                SecurityGroupIds:
-                    - sg-00f3918b436600a44 # Default security group
-                SubnetIds:
-                    - subnet-094a08e21276709af
-                    - subnet-07317a46e9534e665
-                    - subnet-0a09a30458eb9250d
             Events:
                 ApiEvent:
                     Type: Api

@@ -157,7 +157,7 @@ async function sendMessage() {
 	scrollToBottom();
 
 	try {
-		const response = await fetch('http://localhost:3000/query', {
+		const response = await fetch('https://api.aladdinagi.xyz/query', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ input: message }),
