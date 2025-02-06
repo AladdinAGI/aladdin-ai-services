@@ -9,13 +9,11 @@ dotenv.config();
 
 const app = new Koa();
 const router = new Router();
-const port = 3000;
+const port = 3000; // 本地调试时使用
 
 // 创建 AgentService 实例
-
-const OPENAI_API_KEY2 = `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`;
 const agentService = new AgentService({
-	openAIApiKey: process.env.OPENAI_API_KEY || OPENAI_API_KEY2,
+	openAIApiKey: process.env.OPENAI_API_KEY || '',
 	etherscanApiKey: 'NSZCD6S4TKVWRS13PMQFMVTNP6H7NAGHUY',
 	rpcUrl: 'https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
 });
@@ -55,7 +53,12 @@ app.on('error', (err, ctx) => {
 // 使用路由
 app.use(router.routes()).use(router.allowedMethods());
 
-// 启动服务器
-app.listen(port, () => {
-	console.log(`服务器运行在 http://localhost:${port}`);
-});
+// 本地启动服务器（仅用于本地调试，在 Lambda 部署时可以注释掉）
+if (process.env.NODE_ENV === 'development') {
+	app.listen(port, () => {
+		console.log(`服务器运行在 http://localhost:${port}`);
+	});
+}
+
+// 导出 app 实例供 Lambda 使用
+export default app;

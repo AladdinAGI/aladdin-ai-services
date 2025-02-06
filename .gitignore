@@ -7,6 +7,7 @@ yarn-error.log*
 .env
 .env.local
 .env.*.local
+.env.development
 
 # Build output
 dist/
@@ -35,3 +36,8 @@ coverage/
 *.temp
 .cache/
 .parcel-cache/
+
+.env.production
+.aws-sam
+
+ layer/

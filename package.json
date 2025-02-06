@@ -4,7 +4,8 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"dev": "ts-node-dev --no-warnings --respawn --transpile-only ./src/main.ts",
+		"dev": "cross-env NODE_ENV=development ts-node-dev --no-warnings --respawn --transpile-only ./src/main.ts",
+		"build": "webpack --mode production",
 		"lint:fix": "tsc --noEmit & eslint ./src --ext .ts,.tsx --fix",
 		"lint": "eslint \"src/**/*.{ts,js}\""
 	},
@@ -21,6 +22,7 @@
 		"@typescript-eslint/eslint-plugin": "^8.19.1",
 		"@typescript-eslint/parser": "^8.19.1",
 		"buffer": "^5.5.0||^6.0.0",
+		"cross-env": "^7.0.3",
 		"crypto-browserify": "^3.12.0",
 		"eslint": "^9.17.0",
 		"eslint-config-prettier": "^9.1.0",
@@ -38,12 +40,12 @@
 		"@langchain/community": "^0.3.24",
 		"@langchain/core": "^0.3.28",
 		"@langchain/openai": "^0.3.16",
+		"bignumber.js": "^9.1.2",
 		"dotenv": "^16.4.7",
-		"ethers": "^6.13.5",
 		"koa": "^2.15.3",
 		"koa-bodyparser": "^4.4.1",
 		"koa-static": "^5.0.0",
 		"langchain": "^0.3.10",
-		"ts-node": "^10.9.2"
+		"serverless-http": "^3.2.0"
 	}
 }
