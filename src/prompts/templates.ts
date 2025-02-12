@@ -55,19 +55,51 @@ export const basePromptTemplate = (systemPrompt: string) => {
 	return prompt;
 };
 
-export const routerPrompt = ChatPromptTemplate.fromTemplate(`
-  分析用户输入,判断查询类型:
-  1. 如果询问任何代币的价格、市场、走势相关信息,返回: CRYPTO
-  2. 如果是关于质押、投资建议、收益率的问题,返回: DEFI 
-  3. 如果是询问合约安全性、风险分析的问题,返回: SECURITY
-  4. 如果是询问你是谁,返回: IDENTITY
-  5. 其他问题,返回: DEFAULT
+// Crypto Check Prompt 模板
+export const cryptoCheckPrompt = ChatPromptTemplate.fromMessages([
+	[
+		'system',
+		`判断用户的查询是否与加密货币或区块链相关。
+如果相关返回 "true"，不相关返回 "false"。
+只返回 true 或 false，不要其他解释。`,
+	],
+	['human', '{input}'],
+]);
+export const routerPrompt = ChatPromptTemplate.fromTemplate(`分析用户输入,判断查询类型:
 
-  用户输入包含代币相关词时,不论代币种类都返回CRYPTO。
-  
-  用户问题: {input}
-  
-  仅返回: CRYPTO, DEFI, SECURITY, IDENTITY 或 DEFAULT`);
+   1. 价格查询 - 返回 CRYPTO:
+      - 具体代币的价格、行情、市值
+      - 币价走势、涨跌分析
+      - 市场交易数据
+   
+   2. DeFi操作咨询 - 返回 DEFI:
+      - 具体的DeFi产品收益率
+      - 具体的投资建议和操作指导
+      - 具体的交易策略推荐
+   
+   3. 安全相关 - 返回 SECURITY:
+      - 具体项目的合约安全审计
+      - 具体项目的风险分析
+      - 具体的资金安全建议
+   
+   4. 身份查询 - 返回 IDENTITY:
+      - 询问机器人是谁
+      - 询问功能和服务范围
+   
+   5. 其他情况 - 返回 DEFAULT:
+      - 概念解释
+      - 基础知识普及
+      - 行业动态
+      - 不确定的问题
+   
+   注意: 
+   - 如果问到具体代币的价格或市场数据，返回 CRYPTO
+   - 如果是询问概念解释（如"什么是DeFi"），返回 DEFAULT
+   - 只有涉及具体操作和投资建议时才返回 DEFI
+   
+   用户问题: {input}
+   
+   仅返回: CRYPTO, DEFI, SECURITY, IDENTITY 或 DEFAULT`);
 
 // 添加代币提取prompt
 export const extractTokenPrompt = ChatPromptTemplate.fromTemplate(`
