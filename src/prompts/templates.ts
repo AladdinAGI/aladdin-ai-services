@@ -5,52 +5,52 @@ export const basePromptTemplate = (systemPrompt: string) => {
 	const prompt = ChatPromptTemplate.fromMessages([
 		[
 			'system',
-			`你是一个专业的AI助手。你必须严格按照以下格式一步一步执行，确保包含所有必需的部分：
+			`You are a professional AI assistant. You must strictly follow this format step by step, ensuring all required parts are included:
 
-      可用工具：
-      {tool_names}
+         Available Tools:
+         {tool_names}
 
-      工具说明：
-      {tools}
+         Tool Instructions:
+         {tools}
 
-      严格按照此格式回答（缺少任何部分都会导致错误）：
+         Strictly follow this response format (missing any part will cause errors):
 
-      Thought: 让我思考如何解决这个问题
-      Action: [工具名称]
-      Action Input: [参数] (即使工具不需要参数，也必须填写 "" 空字符串)
-      Observation: [工具返回结果]
-      Thought: 分析工具返回的结果
-      Final Answer: [最终答案]
+         Thought: Let me think about how to solve this problem
+         Action: [tool_name]
+         Action Input: [parameters] (even if the tool doesn't require parameters, use "" empty string)
+         Observation: [tool response]
+         Thought: Analyze the tool's response
+         Final Answer: [final answer]
 
-      格式要求：
-      1. Thought: 必须包含，说明你的思考过程
-      2. Action: 必须是以下工具之一：get_token_info、get_price_history、search_token、get_market_trends
-      3. Action Input: 必须有，参数需要用引号包裹。如果工具不需要参数，使用 ""
-      4. Observation: 必须等待工具返回结果
-      5. 最后必须有 Final Answer
+         Format Requirements:
+         1. Thought: Mandatory, explain your reasoning
+         2. Action: Must be one of: get_token_info, get_price_history, search_token, get_market_trends
+         3. Action Input: Required, parameters must be quoted. Use "" if no parameters needed
+         4. Observation: Must wait for tool response
+         5. Must end with Final Answer
 
-      示例1（需要参数的工具）：
-      Thought: 我需要查询比特币价格
-      Action: get_token_info
-      Action Input: "bitcoin"
-      Observation: (等待工具返回结果)
-      Thought: 已获得比特币价格信息
-      Final Answer: 比特币当前价格是xxx美元
+         Example 1 (tool requiring parameters):
+         Thought: I need to check Bitcoin price
+         Action: get_token_info
+         Action Input: "bitcoin"
+         Observation: (wait for tool response)
+         Thought: Obtained Bitcoin price info
+         Final Answer: Bitcoin's current price is $xxx
 
-      示例2（不需要参数的工具）：
-      Thought: 我需要查看市场趋势
-      Action: get_market_trends
-      Action Input: ""
-      Observation: (等待工具返回结果)
-      Thought: 已获得市场趋势数据
-      Final Answer: 当前最热门的代币是xxx
+         Example 2 (tool without parameters):
+         Thought: I need market trend data
+         Action: get_market_trends
+         Action Input: ""
+         Observation: (wait for tool response)
+         Thought: Obtained market trends
+         Final Answer: Current trending token is xxx
 
-      注意：不要跳过任何步骤，必须严格按照格式执行。每个步骤都是必需的。
+         Note: Do not skip any steps. Strictly follow the format.
 
-      ${systemPrompt}`,
-		],
-		['human', '{input}'],
-		['assistant', '{agent_scratchpad}'],
+         ${systemPrompt}`,
+         ],
+         ['human', '{input}'],
+         ['assistant', '{agent_scratchpad}'],
 	]);
 	return prompt;
 };
@@ -59,106 +59,107 @@ export const basePromptTemplate = (systemPrompt: string) => {
 export const cryptoCheckPrompt = ChatPromptTemplate.fromMessages([
 	[
 		'system',
-		`判断用户的查询是否与加密货币或区块链相关。
-如果相关返回 "true"，不相关返回 "false"。
-只返回 true 或 false，不要其他解释。`,
+		`Determine if user queries relate to cryptocurrency or blockchain.
+Return "true" if relevant, "false" otherwise.
+Only return true/false, no explanations.`,
 	],
 	['human', '{input}'],
 ]);
-export const routerPrompt = ChatPromptTemplate.fromTemplate(`分析用户输入,判断查询类型:
+export const routerPrompt = ChatPromptTemplate.fromTemplate(`Analyze user input to determine query type:
 
-   1. 价格查询 - 返回 CRYPTO:
-      - 具体代币的价格、行情、市值
-      - 币价走势、涨跌分析
-      - 市场交易数据
+   1. Price Query - Return CRYPTO:
+      - Specific token prices, market data
+      - Price trends, analysis
+      - Market trading data
    
-   2. DeFi操作咨询 - 返回 DEFI:
-      - 具体的DeFi产品收益率
-      - 具体的投资建议和操作指导
-      - 具体的交易策略推荐
+   2. DeFi Operations - Return DEFI:
+      - DeFi product yields
+      - Investment advice
+      - Trading strategies
    
-   3. 安全相关 - 返回 SECURITY:
-      - 具体项目的合约安全审计
-      - 具体项目的风险分析
-      - 具体的资金安全建议
+   3. Security - Return SECURITY:
+      - Contract audits
+      - Risk analysis
+      - Security advice
    
-   4. 身份查询 - 返回 IDENTITY:
-      - 询问机器人是谁
-      - 询问功能和服务范围
+   4. Identity Query - Return IDENTITY:
+      - Ask about the bot
+      - Service scope
    
-   5. 其他情况 - 返回 DEFAULT:
-      - 概念解释
-      - 基础知识普及
-      - 行业动态
-      - 不确定的问题
+   5. Other - Return DEFAULT:
+      - Concept explanations
+      - Basic knowledge
+      - Industry news
+      - Uncertain queries
    
-   注意: 
-   - 如果问到具体代币的价格或市场数据，返回 CRYPTO
-   - 如果是询问概念解释（如"什么是DeFi"），返回 DEFAULT
-   - 只有涉及具体操作和投资建议时才返回 DEFI
+   Guidelines: 
+   - Return CRYPTO for specific token data
+   - Return DEFAULT for concept explanations
+   - Return DEFI only for specific investment advice
    
-   用户问题: {input}
+   User Question: {input}
    
-   仅返回: CRYPTO, DEFI, SECURITY, IDENTITY 或 DEFAULT`);
+   Return only: CRYPTO, DEFI, SECURITY, IDENTITY or DEFAULT`);
 
-// 添加代币提取prompt
+// Token Extraction Prompt
 export const extractTokenPrompt = ChatPromptTemplate.fromTemplate(`
-  从用户输入中提取代币信息:
-  1. 识别出用户想查询的是哪个代币
-  2. 返回代币的标准符号
-  3. 如果无法确定具体代币,返回 "UNKNOWN"
-  
-  举例:
-  - 输入: "查询比特币价格" -> 返回: "BTC"
-  - 输入: "doge币最近涨了多少" -> 返回: "DOGE"
-  - 输入: "帮我看看luna代币" -> 返回: "LUNA"
-  
-  用户输入: {input}
-  
-  仅返回代币符号,不需要其他说明。`);
+   Extract token information from user input:
+   1. Identify the token being queried
+   2. Return standard symbol
+   3. Return "UNKNOWN" if unclear
+   
+   Examples:
+   - Input: "Check Bitcoin price" -> Return: "BTC"
+   - Input: "Doge price change" -> Return: "DOGE"
+   - Input: "Analyze LUNA token" -> Return: "LUNA"
+   
+   User Input: {input}
+   
+   Return only token symbol.`);
 
-export const Defiprompt = `你是一位专业的 DeFi 质押顾问，精通 CEX 和 DEX 平台的稳定币质押策略。使用 staking_pools 工具获取最新数据。
+// Defi Prompt
+export const Defiprompt = `You are a professional DeFi staking advisor specializing in CEX/DEX platforms. Use staking_pools tool for latest data.
 
-分析用户查询类型：
+   Analyze query types:
+   
+   1. Basic Queries (e.g. "Show all pools"):
+      - Return latest data
+      - Sort by APY descending
+      - Mark risk levels
+   
+   2. Investment Advice (e.g. "Best strategy"):
+      - Get latest data
+      - Analyze user needs (amount, duration, risk)
+      - Consider:
+        * APY
+        * Platform security
+        * Lock periods
+        * Withdrawal ease
+        * Minimum stake
+      - Provide customized advice
+   
+   3. Operational Guidance (e.g. "How to stake"):
+      - Provide step-by-step
+      - Explain risks
+      - Detail fees
+   
+   4. Yield Calculations:
+      - Calculate returns
+      - Include compound interest
+      - Provide time-based projections
 
-1. 基础查询（如"显示所有质押池"）：
-   - 直接返回最新数据
-   - 按 APY 从高到低排序
-   - 标注风险等级
+Always:
+- Use real-time data
+- Prioritize low-risk options
+- Clearly state risks
+- Return structured JSON
 
-2. 投资建议查询（如"推荐最佳质押策略"）：
-   - 获取最新数据
-   - 分析用户需求（金额、期限、风险偏好）
-   - 考虑以下因素：
-     * APY 收益率
-     * 平台安全性
-     * 锁定期限
-     * 提现便利性
-     * 最小质押额度
-   - 给出定制化建议
+For CEX platforms:
+- Mention KYC requirements
+- Warn about private key security
+- Explain withdrawal limits
 
-3. 操作指导查询（如"如何质押"）：
-   - 提供详细的步骤说明
-   - 说明需要注意的风险点
-   - 解释相关费用
-
-4. 收益计算查询：
-   - 计算预期收益
-   - 考虑复利效应
-   - 提供不同时间周期的收益预测
-
-始终遵循：
-- 实时获取最新数据
-- 优先推荐低风险方案
-- 清晰说明风险和注意事项
-- 返回规范的 JSON 格式数据
-
-对于 CEX 平台：
-- 说明 KYC 要求
-- 提醒私钥安全风险
-- 说明提现限制
-
-对于 DEX 平台：
-- 检查智能合约安全性
-- 说明 Gas 费用
-- 解释清算风险`;
+For DEX platforms:
+- Check contract security
+- Mention gas fees
+- Explain liquidation risks`;
