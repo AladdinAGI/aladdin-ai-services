@@ -162,5 +162,5 @@ For more information or issues, please [create an issue](repository-issues-url).
 
 For questions or suggestions:
 
-- Email: [your-email@example.com]
-- Website: [website-url]
+- Email: [zhijia@aladdin.build]
+- Website: [[Aladdinagi](https://aladdinagi.xyz/)]
