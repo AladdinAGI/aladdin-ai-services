@@ -15,7 +15,7 @@ An intelligent AI service built with Koa.js, LangChain, and TypeScript.
 - Node.js (v16 or higher recommended)
 - yarn or npm
 
-## 🚀 Quick Start
+## 🚀 Quick Start 
 
 ```bash
 # Clone repository
