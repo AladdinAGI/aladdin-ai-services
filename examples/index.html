@@ -28,6 +28,11 @@
 				</nav>
 			</div>
 			<div class="header-right">
+				<div class="language-switcher">
+					<button class="lang-btn" onclick="switchLanguage('en')">EN</button>
+					<span class="divider">|</span>
+					<button class="lang-btn" onclick="switchLanguage('zh')">中文</button>
+				</div>
 				<button id="connectWallet" class="connect-btn">
 					<span data-lang="en">Connect Wallet</span>
 					<span data-lang="zh">连接钱包</span>
@@ -143,24 +148,5 @@
 		</div>
 
 		<script src="./index.js"></script>
-		<script>
-			document.addEventListener('DOMContentLoaded', () => {
-				// Detect browser language (default to English)
-				const userLang = navigator.language.startsWith('zh') ? 'zh' : 'en';
-				document.documentElement.lang = userLang;
-				
-				// Show appropriate language version
-				document.querySelectorAll('[data-lang]').forEach(el => {
-					el.style.display = el.dataset.lang === userLang ? 'inline' : 'none';
-				});
-				
-				// Set dynamic placeholders
-				document.querySelectorAll('[data-placeholder-en]').forEach(input => {
-					input.placeholder = userLang === 'zh' 
-						? input.dataset.placeholderZh 
-						: input.dataset.placeholderEn;
-				});
-			});
-		</script>
 	</body>
 </html>
