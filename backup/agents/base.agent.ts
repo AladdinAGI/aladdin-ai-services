@@ -25,7 +25,7 @@ export abstract class BaseAgent {
 
 	protected async baseInitialize(systemPrompt: string) {
 		try {
-			// Use basePromptTemplate
+			// 使用 basePromptTemplate
 			const prompt = basePromptTemplate(systemPrompt);
 
 			const agent = await createReactAgent({
@@ -39,11 +39,11 @@ export abstract class BaseAgent {
 				tools: this.tools,
 				maxIterations: 3,
 				returnIntermediateSteps: true,
-				verbose: false, // Enable debug output
-				handleParsingErrors: false, // Disable default parsing error handling
+				verbose: false, // 开启调试输出
+				handleParsingErrors: false, // 关闭默认的解析错误处理
 			});
 
-			// Add error handling callback
+			// 添加错误处理回调
 			// Note: AgentExecutor does not have an onError property, so this part is removed.
 		} catch (error) {
 			console.error('Error initializing agent:', error);
@@ -63,7 +63,7 @@ export abstract class BaseAgent {
 				throw new Error('Executor not initialized');
 			}
 
-			// Prepare tool name list
+			// 准备工具名称列表
 			const toolNames = this.tools.map((tool) => tool.name).join(', ');
 
 			const result = await this.executor.invoke({
@@ -72,11 +72,11 @@ export abstract class BaseAgent {
 				tool_names: toolNames,
 			});
 
-			// Process results
+			// 处理结果
 			let parsedData = null;
 			let outputText = result.output;
 
-			// Try to extract data from intermediate steps
+			// 尝试从中间步骤中提取数据
 			if (result.intermediateSteps) {
 				for (const step of result.intermediateSteps) {
 					try {
@@ -98,17 +98,17 @@ export abstract class BaseAgent {
 		} catch (error) {
 			console.error('Query error:', error);
 
-			// Special handling for iteration limit exceeded error
+			// 特殊处理迭代超限错误
 			if ((error as Error).message?.includes('max iterations')) {
 				return {
-					output: 'Sorry, I need more steps to process this query. Please try a more specific question.',
+					output: '抱歉，我需要更多步骤来处理这个查询。请尝试更具体的问题。',
 					error: 'MAX_ITERATIONS_REACHED',
 				};
 			}
 
 			return {
-				output: 'An error occurred while processing the request',
-				error: error instanceof Error ? error.message : 'Unknown error',
+				output: '处理请求时发生错误',
+				error: error instanceof Error ? error.message : '未知错误',
 			};
 		}
 	}
