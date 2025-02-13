@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh">
+<html lang="en">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,92 +8,139 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
 	</head>
 	<body>
-		<!-- 头部导航 -->
+		<!-- Header Navigation -->
 		<header class="app-header">
 			<div class="header-left">
-				<h1><img src="./logo.svg" / width="120px"></h1>
+				<h1><img src="./logo.svg" width="120px"></h1>
 				<nav>
-					<a href="#" class="active">首页</a>
-					<a href="#">质押</a>
-					<a href="#">行情</a>
+					<a href="#" class="active">
+						<span data-lang="en">Home</span>
+						<span data-lang="zh">首页</span>
+					</a>
+					<a href="#">
+						<span data-lang="en">Staking</span>
+						<span data-lang="zh">质押</span>
+					</a>
+					<a href="#">
+						<span data-lang="en">Market</span>
+						<span data-lang="zh">行情</span>
+					</a>
 				</nav>
 			</div>
 			<div class="header-right">
-				<button id="connectWallet" class="connect-btn">连接钱包</button>
+				<div class="language-switcher">
+					<button class="lang-btn" onclick="switchLanguage('en')">EN</button>
+					<span class="divider">|</span>
+					<button class="lang-btn" onclick="switchLanguage('zh')">中文</button>
+				</div>
+				<button id="connectWallet" class="connect-btn">
+					<span data-lang="en">Connect Wallet</span>
+					<span data-lang="zh">连接钱包</span>
+				</button>
 			</div>
 		</header>
 
 		<div class="container">
-			<!-- 左侧列表面板 -->
+			<!-- Left History Panel -->
 			<div class="left-panel">
 				<div class="history-header">
-					<h2>历史问题</h2>
+					<h2>
+						<span data-lang="en">History</span>
+						<span data-lang="zh">历史问题</span>
+					</h2>
 				</div>
 				<div class="history-list" id="historyList">
-					<!-- 历史问题将通过JS动态添加 -->
+					<!-- History items will be populated dynamically -->
 				</div>
 			</div>
 
-			<!-- 中间聊天区域 -->
+			<!-- Main Chat Area -->
 			<div class="chat-panel">
 				<div class="chat-messages" id="chatMessages">
 					<div class="message ai">
 						<div class="avatar">AI</div>
 						<div class="message-content">
-							👋 您好！我是 Aladdin AI 助手，可以帮您：
+							<span data-lang="en">👋 Hello! I'm Aladdin AI Assistant, I can help you:</span>
+							<span data-lang="zh">👋 您好！我是 Aladdin AI 助手，可以帮您：</span>
 							<div id="helpContent"></div>
 						</div>
 					</div>
 				</div>
 				<div class="chat-input">
-					<input type="text" id="messageInput" placeholder="输入您的问题..." />
-					<button id="sendButton">发送</button>
+					<input type="text" id="messageInput" 
+						placeholder="Type your question..." 
+						data-placeholder-en="Type your question..." 
+						data-placeholder-zh="输入您的问题..." />
+					<button id="sendButton">
+						<span data-lang="en">Send</span>
+						<span data-lang="zh">发送</span>
+					</button>
 				</div>
 			</div>
 
-			<!-- 右侧数据面板 -->
-			<!-- 右侧数据面板 -->
+			<!-- Right Data Panel -->
 			<div class="right-panel">
 				<div class="stats-section">
-					<h2>我的质押</h2>
+					<h2>
+						<span data-lang="en">My Staking</span>
+						<span data-lang="zh">我的质押</span>
+					</h2>
 					<div class="stats-grid">
 						<div class="stat-card main-stat">
-							<h3>总质押金额</h3>
+							<h3>
+								<span data-lang="en">Total Staked</span>
+								<span data-lang="zh">总质押金额</span>
+							</h3>
 							<div class="amount">$3,000.00</div>
 						</div>
 						<div class="stats-row">
 							<div class="stat-card sub-stat">
-								<h3>累计收益</h3>
+								<h3>
+									<span data-lang="en">Total Earnings</span>
+									<span data-lang="zh">累计收益</span>
+								</h3>
 								<div class="amount">$36.30</div>
 							</div>
 							<div class="stat-card sub-stat">
-								<h3>平均年化</h3>
+								<h3>
+									<span data-lang="en">Average APR</span>
+									<span data-lang="zh">平均年化</span>
+								</h3>
 								<div class="amount">5.06%</div>
 							</div>
 						</div>
 					</div>
 				</div>
 
-				<!-- 质押分布饼图 -->
+				<!-- Staking Distribution Chart -->
 				<div class="chart-section">
 					<div class="chart-header">
-						<h2>质押分布</h2>
+						<h2>
+							<span data-lang="en">Staking Distribution</span>
+							<span data-lang="zh">质押分布</span>
+						</h2>
 					</div>
 					<div id="stakingDistribution" class="chart"></div>
 				</div>
 
-				<!-- 收益走势图 -->
+				<!-- Earnings Trend Chart -->
 				<div class="chart-section">
 					<div class="chart-header">
-						<h2>每日收益</h2>
+						<h2>
+							<span data-lang="en">Daily Earnings</span>
+							<span data-lang="zh">每日收益</span>
+						</h2>
 					</div>
 					<div id="earningsChart" class="chart"></div>
 				</div>
 
-				<!-- 平台健康度 -->
+				<!-- Platform Health Chart -->
 				<div class="chart-section">
 					<div class="chart-header">
-						<h2>平台健康度</h2>
+						<h2>
+							<span data-lang="en">Platform Health</span>
+							<span data-lang="zh">平台健康度</span>
+						</h2>
 					</div>
 					<div id="platformHealth" class="chart"></div>
 				</div>

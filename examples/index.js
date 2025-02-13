@@ -1,56 +1,77 @@
-// 存储历史问题和对话
+// Store chat history
 let chatHistory = [];
-const MAX_HISTORY = 20; // 最多保存20条历史记录
+const MAX_HISTORY = 20; // Maximum stored history items
 
-// 功能列表配置
+// Tool configuration
 const toolsInfo = [
 	{
-		name: '代币信息查询',
-		examples: ['查询比特币现在的价格', '以太坊的市值是多少', '通过合约地址查询代币信息 (例如：0x...)'],
+		name: { en: 'Token Information', zh: '代币信息' },
+		examples: {
+			en: ['Current Bitcoin price', 'Ethereum market cap', 'Search by contract address (e.g. 0x...)'],
+			zh: ['当前比特币价格', '以太坊市值', '通过合约地址搜索 (例如 0x...)']
+		}
 	},
 	{
-		name: '价格历史查询',
-		examples: ['比特币最近7天的价格走势', '显示以太坊30天价格历史', 'BNB的价格变化趋势'],
+		name: { en: 'Price History', zh: '价格历史' },
+		examples: {
+			en: ['Bitcoin 7-day trend', 'Ethereum 30-day history', 'BNB price changes'],
+			zh: ['比特币7天趋势', '以太坊30天历史', 'BNB价格变化']
+		}
 	},
 	{
-		name: '代币搜索',
-		examples: ['搜索包含"uni"的代币', '查找Arbitrum相关的代币', '寻找最近热门的代币'],
+		name: { en: 'Token Search', zh: '代币搜索' },
+		examples: {
+			en: ['Search "uni" tokens', 'Find Arbitrum tokens', 'Trending tokens'],
+			zh: ['搜索"uni"代币', '查找Arbitrum代币', '热门代币']
+		}
 	},
 	{
-		name: '市场趋势',
-		examples: ['显示当前市场趋势', '最热门的代币有哪些', '查看市场上涨幅最大的币种'],
+		name: { en: 'Market Trends', zh: '市场趋势' },
+		examples: {
+			en: ['Current market trends', 'Top trending tokens', 'Top gainers'],
+			zh: ['当前市场趋势', '热门代币', '涨幅最大代币']
+		}
 	},
 	{
-		name: '稳定币质押',
-		examples: ['推荐最高收益的USDC质押池', '推荐最高收益的USDT质押池', '推荐最高收益的DAI质押池'],
+		name: { en: 'Stablecoin Staking', zh: '稳定币质押' },
+		examples: {
+			en: ['Best USDC staking pools', 'Best USDT staking APY', 'Top DAI yields'],
+			zh: ['最佳USDC质押池', '最佳USDT质押年化', '最高DAI收益']
+		}
 	},
 ];
 
-// 页面加载时初始化
+// Initialize on window load
 window.onload = function () {
+	initializeLanguage();
 	initializeHelpContent();
 	loadChatHistory();
 	setupEventListeners();
 	initializeRightPanelCharts();
 };
 
-// 初始化帮助内容
-// 初始化帮助内容
+// Initialize help content
 function initializeHelpContent() {
 	const helpContent = document.getElementById('helpContent');
+	const lang = document.documentElement.lang;
+	
+	helpContent.innerHTML = ''; // Clear existing content
+	
 	toolsInfo.forEach((tool) => {
 		const section = document.createElement('div');
 		section.className = 'tool-section';
 		section.innerHTML = `
-            <h3>${tool.name}</h3>
-            <div class="quick-questions">
-                ${tool.examples.map((example) => `<button class="quick-question-btn">${example}</button>`).join('')}
-            </div>
-        `;
+			<h3>${tool.name[lang]}</h3>
+			<div class="quick-questions">
+				${tool.examples[lang].map(example => `
+					<button class="quick-question-btn">${example}</button>
+				`).join('')}
+			</div>
+		`;
 		helpContent.appendChild(section);
 	});
 
-	// 添加快速问题点击事件
+	// Add quick question click handlers
 	document.querySelectorAll('.quick-question-btn').forEach((btn) => {
 		btn.addEventListener('click', () => {
 			document.getElementById('messageInput').value = btn.textContent;
@@ -59,7 +80,7 @@ function initializeHelpContent() {
 	});
 }
 
-// 从localStorage加载历史记录
+// Load history from localStorage
 function loadChatHistory() {
 	const saved = localStorage.getItem('chatHistory');
 	if (saved) {
@@ -68,32 +89,29 @@ function loadChatHistory() {
 	}
 }
 
-// 保存历史记录到localStorage
+// Save history to localStorage
 function saveChatHistory() {
 	localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
 }
 
-// 添加新的对话到历史记录
+// Add new history entry
 function addToHistory(question, answer) {
 	const time = new Date().toLocaleTimeString();
 	let type = 'general';
 
-	// 根据问题内容判断类型
+	// Bilingual type detection
 	const lowerQuestion = question.toLowerCase();
-	if (lowerQuestion.includes('质押') || lowerQuestion.includes('apy') || lowerQuestion.includes('收益')) {
+	if (lowerQuestion.includes('staking') || lowerQuestion.includes('质押') || 
+		lowerQuestion.includes('apy') || lowerQuestion.includes('收益')) {
 		type = 'staking';
-	} else if (lowerQuestion.includes('价格') || lowerQuestion.includes('币价') || lowerQuestion.includes('市值')) {
+	} else if (lowerQuestion.includes('price') || lowerQuestion.includes('价格') || 
+		lowerQuestion.includes('market cap') || lowerQuestion.includes('币价')) {
 		type = 'price';
 	}
 
-	chatHistory.push({
-		time,
-		question,
-		answer,
-		type,
-	});
+	chatHistory.push({ time, question, answer, type });
 
-	// 保持最新的20条记录
+	// Maintain history limit
 	if (chatHistory.length > MAX_HISTORY) {
 		chatHistory.shift();
 	}
@@ -101,13 +119,12 @@ function addToHistory(question, answer) {
 	updateHistoryDisplay();
 }
 
-// 更新历史记录显示
-// 更新历史记录显示
+// Update history display
 function updateHistoryDisplay() {
 	const historyList = document.getElementById('historyList');
 	historyList.innerHTML = '';
 
-	// 从最新的开始显示
+	// Display reversed history (newest first)
 	chatHistory
 		.slice()
 		.reverse()
@@ -115,23 +132,29 @@ function updateHistoryDisplay() {
 			const historyItem = document.createElement('div');
 			historyItem.className = 'history-item';
 
-			// 根据类型添加不同的标签样式
-			let tagHtml = '';
+			// Bilingual tags
+			let tags = '';
 			if (item.type === 'staking') {
-				tagHtml = '<span class="tag-staking">质押</span>';
+				tags = `
+					<span class="tag-staking" data-lang="en">Staking</span>
+					<span class="tag-staking" data-lang="zh">质押</span>
+				`;
 			} else if (item.type === 'price') {
-				tagHtml = '<span class="tag-price">行情</span>';
+				tags = `
+					<span class="tag-price" data-lang="en">Price</span>
+					<span class="tag-price" data-lang="zh">行情</span>
+				`;
 			}
 
 			historyItem.innerHTML = `
-            <div class="history-time">${item.time}</div>
-            <div class="history-content">
-                <div class="history-question">${item.question}</div>
-                ${tagHtml}
-            </div>
-        `;
+				<div class="history-time">${item.time}</div>
+				<div class="history-content">
+					<div class="history-question">${item.question}</div>
+					${tags}
+				</div>
+			`;
 
-			// 点击重新发送问题
+			// Click to resend
 			historyItem.addEventListener('click', () => {
 				document.getElementById('messageInput').value = item.question;
 				sendMessage();
@@ -141,7 +164,7 @@ function updateHistoryDisplay() {
 		});
 }
 
-// 移动 handleResponse 函数调用到发送消息函数内
+// Message sending logic
 async function sendMessage() {
 	const input = document.getElementById('messageInput');
 	const message = input.value.trim();
@@ -166,13 +189,16 @@ async function sendMessage() {
 		const responseData = await response.json();
 		handleResponse(responseData, loadingMessage);
 
-		// 在获取到响应后，将问题和答案添加到历史记录
+		// Add to history after response
 		if (responseData.output) {
 			addToHistory(message, responseData.output);
 		}
 	} catch (error) {
-		console.error('Error:', error);
-		loadingMessage.querySelector('.message-content').textContent = '抱歉，服务器连接失败，请稍后重试。';
+		console.error('API Error:', error);
+		loadingMessage.querySelector('.message-content').textContent = 
+			document.documentElement.lang === 'zh' 
+				? '抱歉，服务器连接失败，请稍后重试。' 
+				: 'Service unavailable. Please try again later.';
 	} finally {
 		input.disabled = false;
 		sendButton.disabled = false;
@@ -182,13 +208,12 @@ async function sendMessage() {
 	}
 }
 
-// 处理响应数据// 处理响应数据
-// 处理响应数据
+// Handle API response
 function handleResponse(responseData, loadingMessage) {
 	const messageContent = document.createElement('div');
 	messageContent.className = 'message-content';
 
-	// 处理文本响应
+	// Process text response
 	if (responseData.output) {
 		const textDiv = document.createElement('div');
 		const processedOutput = responseData.output.replace(/\\n/g, '\n').replace(/\n/g, '<br>');
@@ -196,16 +221,14 @@ function handleResponse(responseData, loadingMessage) {
 		messageContent.appendChild(textDiv);
 	}
 
-	// 处理数据响应
+	// Process data responses
 	if (responseData.data) {
 		if (responseData.type === 'staking_pools') {
 			const poolsTable = createStakingPoolsTable(responseData.data);
 			messageContent.appendChild(poolsTable);
 		} else if (responseData.data.prices) {
-			// 创建图表容器
 			const chartDiv = createChartContainer();
 			messageContent.appendChild(chartDiv);
-			// 等待DOM更新后初始化图表
 			setTimeout(() => renderPriceChart(chartDiv, responseData.data.prices), 0);
 		} else if (Array.isArray(responseData.data)) {
 			const table = createTable(responseData.data);
@@ -213,27 +236,26 @@ function handleResponse(responseData, loadingMessage) {
 		}
 	}
 
-	// 替换加载消息
+	// Replace loading message
 	loadingMessage.querySelector('.message-content').replaceWith(messageContent);
 }
 
-// 创建图表容器
-// 修改创建图表容器的函数
+// Create chart container
 function createChartContainer() {
 	const chartDiv = document.createElement('div');
 	chartDiv.className = 'chart-container';
-	// 设置最小宽度，确保图表不会太窄
+	// Set minimum width to ensure chart doesn't get too narrow
 	chartDiv.style.minWidth = '800px';
 	chartDiv.style.width = '100%';
-	chartDiv.style.height = '360px'; // 增加高度以适应旋转的标签
-	// 添加水平滚动的容器
+	chartDiv.style.height = '360px'; // Increase height to accommodate rotated labels
+	// Add horizontal scroll container
 	const scrollContainer = document.createElement('div');
 	scrollContainer.className = 'chart-scroll-container';
 	scrollContainer.appendChild(chartDiv);
 	return scrollContainer;
 }
 
-// 格式化日期
+// Format date
 function formatDate(timestamp) {
 	const date = new Date(timestamp);
 	const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -243,8 +265,7 @@ function formatDate(timestamp) {
 	return `${month}-${day} ${hour}:${minute}`;
 }
 
-// 渲染价格图表
-// 更新渲染图表函数
+// Render price chart
 function renderPriceChart(chartContainer, prices) {
 	const chartDiv = chartContainer.querySelector('.chart-container');
 	const chart = echarts.init(chartDiv);
@@ -258,7 +279,7 @@ function renderPriceChart(chartContainer, prices) {
 
 	const option = {
 		title: {
-			text: `价格走势${isPositive ? '↑' : '↓'} ${isPositive ? '+' : ''}${priceChange}%`,
+			text: `Price Trend ${isPositive ? '↑' : '↓'} ${isPositive ? '+' : ''}${priceChange}%`,
 			left: 'center',
 			top: 10,
 			textStyle: {
@@ -275,7 +296,7 @@ function renderPriceChart(chartContainer, prices) {
 			textStyle: { color: '#333' },
 			formatter: function (params) {
 				const data = params[0];
-				return `${data.name}<br/>价格: $${data.value.toFixed(2)}`;
+				return `${data.name}<br/>Price: $${data.value.toFixed(2)}`;
 			},
 			axisPointer: {
 				type: 'cross',
@@ -286,9 +307,9 @@ function renderPriceChart(chartContainer, prices) {
 		},
 		grid: {
 			top: 60,
-			left: 60, // 增加左侧间距以显示价格
+			left: 60, // Increase left spacing to show price
 			right: 30,
-			bottom: 60, // 增加底部间距以显示日期
+			bottom: 60, // Increase bottom spacing to show date
 			containLabel: true,
 		},
 		xAxis: {
@@ -298,9 +319,9 @@ function renderPriceChart(chartContainer, prices) {
 			axisLine: { lineStyle: { color: '#ddd' } },
 			axisLabel: {
 				color: '#666',
-				rotate: 45, // 固定45度角显示日期
-				interval: Math.ceil(dates.length / 30), // 根据数据量自动计算间隔
-				margin: 15, // 增加标签与轴的距离
+				rotate: 45, // Fixed 45 degree angle for date display
+				interval: Math.ceil(dates.length / 30), // Auto-calculate interval based on data
+				margin: 15, // Increase label-to-axis distance
 			},
 		},
 		yAxis: {
@@ -317,7 +338,7 @@ function renderPriceChart(chartContainer, prices) {
 		},
 		dataZoom: [
 			{
-				// 添加缩放控件
+				// Add zoom controls
 				type: 'inside',
 				start: 0,
 				end: 100,
@@ -354,26 +375,26 @@ function renderPriceChart(chartContainer, prices) {
 
 	chart.setOption(option);
 
-	// 响应式调整
+	// Responsive adjustment
 	const resizeHandler = () => {
 		if (chart) {
 			chart.resize({
-				width: Math.max(800, chartContainer.clientWidth), // 确保最小宽度
+				width: Math.max(800, chartContainer.clientWidth), // Ensure minimum width
 			});
 		}
 	};
 
 	window.addEventListener('resize', resizeHandler);
-	resizeHandler(); // 初始调整
+	resizeHandler(); // Initial adjustment
 
-	// 清理函数
+	// Cleanup function
 	return () => {
 		window.removeEventListener('resize', resizeHandler);
 		chart.dispose();
 	};
 }
 
-// 创建质押池表格
+// Create staking pool table
 function createStakingPoolsTable(pools) {
 	const table = document.createElement('table');
 	table.className = 'staking-pools-table';
@@ -381,11 +402,11 @@ function createStakingPoolsTable(pools) {
 	table.innerHTML = `
         <thead>
             <tr>
-                <th>平台</th>
-                <th>代币</th>
+                <th>Platform</th>
+                <th>Token</th>
                 <th>APY</th>
-                <th>风险等级</th>
-                <th>最小质押额</th>
+                <th>Risk Level</th>
+                <th>Minimum Stake</th>
             </tr>
         </thead>
         <tbody>
@@ -408,7 +429,7 @@ function createStakingPoolsTable(pools) {
 	return table;
 }
 
-// 创建普通数据表格
+// Create regular data table
 function createTable(data) {
 	const table = document.createElement('table');
 	table.className = 'data-table';
@@ -437,27 +458,27 @@ function createTable(data) {
 	return table;
 }
 
-// 创建收益计算显示
+// Create earnings display
 function createEarningsDisplay(data) {
 	const div = document.createElement('div');
 	div.className = 'earnings-display';
 
 	div.innerHTML = `
         <div class="earnings-header">
-            <h3>收益预测</h3>
-            <span class="amount">投资金额: $${formatNumber(data.principal)}</span>
+            <h3>Earnings Prediction</h3>
+            <span class="amount">Investment Amount: $${formatNumber(data.principal)}</span>
         </div>
         <div class="earnings-grid">
             <div class="earnings-item">
-                <span class="label">日收益</span>
+                <span class="label">Daily Earnings</span>
                 <span class="value">$${formatNumber(data.dailyEarnings)}</span>
             </div>
             <div class="earnings-item">
-                <span class="label">月收益</span>
+                <span class="label">Monthly Earnings</span>
                 <span class="value">$${formatNumber(data.monthlyEarnings)}</span>
             </div>
             <div class="earnings-item">
-                <span class="label">年收益</span>
+                <span class="label">Yearly Earnings</span>
                 <span class="value">$${formatNumber(data.yearlyEarnings)}</span>
             </div>
         </div>
@@ -466,14 +487,14 @@ function createEarningsDisplay(data) {
 	return div;
 }
 
-// 创建风险分析显示
+// Create risk analysis display
 function createRiskAnalysisDisplay(data) {
 	const div = document.createElement('div');
 	div.className = 'risk-analysis';
 
 	div.innerHTML = `
         <div class="risk-header">
-            <h3>${data.platform}平台风险分析</h3>
+            <h3>${data.platform} Platform Risk Analysis</h3>
         </div>
         <div class="risk-factors">
             ${data.factors
@@ -495,7 +516,7 @@ function createRiskAnalysisDisplay(data) {
 	return div;
 }
 
-// UI Helper 函数
+// UI Helper functions
 function createLoadingMessage() {
 	const loadingDiv = document.createElement('div');
 	loadingDiv.className = 'message ai';
@@ -537,7 +558,7 @@ function addMessage(content, type) {
 	scrollToBottom();
 }
 
-// 工具函数
+// Utility functions
 function formatNumber(num) {
 	return new Intl.NumberFormat('en-US', {
 		maximumFractionDigits: 2,
@@ -551,7 +572,7 @@ function scrollToBottom() {
 	chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-// 设置事件监听
+// Set event listeners
 function setupEventListeners() {
 	document.getElementById('sendButton').addEventListener('click', sendMessage);
 
@@ -561,14 +582,14 @@ function setupEventListeners() {
 		}
 	});
 }
-// 初始化右侧面板图表
+// Initialize right panel charts
 function initializeRightPanelCharts() {
 	initializeStakingDistribution();
 	initializeEarningsChart();
 	initializePlatformHealth();
 }
 
-// 质押分布饼图
+// Staking distribution pie chart
 function initializeStakingDistribution() {
 	const chart = echarts.init(document.getElementById('stakingDistribution'));
 
@@ -615,11 +636,11 @@ function initializeStakingDistribution() {
 	window.addEventListener('resize', () => chart.resize());
 }
 
-// 收益走势图
+// Earnings trend chart
 function initializeEarningsChart() {
 	const chart = echarts.init(document.getElementById('earningsChart'));
 
-	// 模拟最近7天的每日收益数据
+	// Simulate daily earnings data for the past 7 days
 	const dates = Array.from({ length: 7 }, (_, i) => {
 		const date = new Date();
 		date.setDate(date.getDate() - i);
@@ -680,7 +701,7 @@ function initializeEarningsChart() {
 	window.addEventListener('resize', () => chart.resize());
 }
 
-// 平台健康度仪表盘
+// Platform health gauge
 function initializePlatformHealth() {
 	const chart = echarts.init(document.getElementById('platformHealth'));
 
@@ -807,4 +828,39 @@ function initializePlatformHealth() {
 
 	chart.setOption(option);
 	window.addEventListener('resize', () => chart.resize());
+}
+
+// Language initialization
+document.addEventListener('DOMContentLoaded', initializeLanguage);
+
+function initializeLanguage() {
+	let userLang = localStorage.getItem('userLang') || 
+				   detectChineseServer() || 
+				   (navigator.language.startsWith('zh') ? 'zh' : 'en');
+	
+	document.documentElement.lang = userLang;
+	
+	// Update UI elements
+	document.querySelectorAll('[data-lang]').forEach(el => {
+		el.style.display = el.dataset.lang === userLang ? 'inline' : 'none';
+	});
+	
+	document.querySelectorAll('[data-placeholder-en]').forEach(input => {
+		input.placeholder = userLang === 'zh' 
+			? input.dataset.placeholderZh 
+			: input.dataset.placeholderEn;
+	});
+}
+
+// Add to existing language functions
+function switchLanguage(lang) {
+	localStorage.setItem('userLang', lang);
+	initializeLanguage();
+	refreshDynamicContent();
+}
+
+function refreshDynamicContent() {
+	initializeHelpContent(); // Refresh help examples
+	updateHistoryDisplay(); // Refresh history items
+	// Add other dynamic content refreshes if needed
 }

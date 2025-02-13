@@ -68,6 +68,18 @@ body {
 	color: white;
 }
 
+.header-right {
+	display: flex;
+	align-items: center;
+	gap: 20px;
+}
+
+.language-switcher {
+	margin-right: 20px;
+	display: flex;
+	align-items: center;
+}
+
 .connect-btn {
 	padding: 8px 20px;
 	border-radius: 20px;
@@ -77,10 +89,35 @@ body {
 	cursor: pointer;
 	font-size: 14px;
 	transition: all 0.3s;
+	order: 2;
 }
 
 .connect-btn:hover {
 	background: #40a9ff;
+}
+
+.lang-btn {
+	background: none;
+	border: none;
+	color: #666;
+	cursor: pointer;
+	font-size: 14px;
+	padding: 4px 8px;
+	transition: color 0.2s;
+}
+
+.lang-btn:hover {
+	color: #1890ff;
+}
+
+.lang-btn.active {
+	color: #1890ff;
+	font-weight: 500;
+}
+
+.divider {
+	color: #ddd;
+	margin: 0 4px;
 }
 
 /* Main Container */
