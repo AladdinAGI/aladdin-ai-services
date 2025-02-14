@@ -9,28 +9,28 @@ dotenv.config();
 
 const app = new Koa();
 const router = new Router();
-const port = 3000; // 本地调试时使用
+const port = 3000; // Use for local debugging
 
-// 创建 AgentService 实例
+// Create AgentService instance
 const agentService = new AgentService({
 	openAIApiKey: process.env.OPENAI_API_KEY || '',
 	etherscanApiKey: 'NSZCD6S4TKVWRS13PMQFMVTNP6H7NAGHUY',
 	rpcUrl: 'https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
 });
-// 初始化 agents
+// Initialize agents
 agentService.initialize().catch(console.error);
 
-// 中间件
+// Middleware
 app.use(cors());
 app.use(bodyParser());
 
-// API 路由
+// API routes
 router.post('/query', async (ctx) => {
 	try {
 		const { input } = ctx.request.body as { input: string };
 		if (!input) {
 			ctx.status = 400;
-			ctx.body = { error: '请提供问题内容' };
+			ctx.body = { error: 'Please provide a question' };
 			return;
 		}
 
@@ -39,8 +39,8 @@ router.post('/query', async (ctx) => {
 	} catch (error) {
 		ctx.status = 500;
 		ctx.body = {
-			error: '服务器错误',
-			message: error instanceof Error ? error.message : '未知错误',
+			error: 'Server error',
+			message: error instanceof Error ? error.message : 'Unknown error',
 		};
 	}
 });
@@ -50,20 +50,20 @@ router.get('/test', async (ctx) => {
 		data: 'Hello Aladdin',
 	};
 });
-// 错误处理
+// Error handling
 app.on('error', (err, ctx) => {
-	console.error('服务器错误:', err);
+	console.error('Server error:', err);
 });
 
-// 使用路由
+// Use routes
 app.use(router.routes()).use(router.allowedMethods());
 
-// 本地启动服务器（仅用于本地调试，在 Lambda 部署时可以注释掉）
+// Start server locally (only for local debugging, can be commented out when deploying to Lambda)
 if (process.env.NODE_ENV === 'development') {
 	app.listen(port, () => {
-		console.log(`服务器运行在 http://localhost:${port}`);
+		console.log(`Server running at http://localhost:${port}`);
 	});
 }
 
-// 导出 app 实例供 Lambda 使用
+// Export app instance for Lambda usage
 export default app;

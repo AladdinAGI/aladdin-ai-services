@@ -54,11 +54,11 @@ export class AgentService {
 		try {
 			const formattedPrompt = await cryptoCheckPrompt.format({ input });
 			const response = await this.llmModel.invoke(formattedPrompt);
-			console.log('Crypto check response:', response);
+			console.log('🐻🐻🐻🐻🐻🐻🐻🐻🐻 ', response);
 			const result = typeof response.content === 'string' ? response.content.toLowerCase().trim() : '';
 			return result === 'true';
 		} catch (error) {
-			console.error('Error checking crypto relevance:', error);
+			console.error('Error checking if crypto related:', error);
 			return false;
 		}
 	}
@@ -67,7 +67,7 @@ export class AgentService {
 		try {
 			const routerResponse = await this.llmModel.invoke(await routerPrompt.format({ input }));
 			const route = String(routerResponse.content).trim() as RouteType;
-			console.log('Routing decision:', route);
+			console.log('🍊🍊🍊🍊🍊🍊🍊🍊🍊🍊🍊', route);
 			let response: AgentResponse;
 
 			switch (route) {
@@ -83,7 +83,7 @@ export class AgentService {
 				}
 				case 'DEFI': {
 					const defiResponse = await this.defiAgent.query(input);
-					console.log('DeFi response:', defiResponse);
+					console.log('🍌🍌🍌', defiResponse);
 					response = {
 						output: defiResponse.output,
 						type: 'defi_general',
@@ -93,11 +93,12 @@ export class AgentService {
 				}
 				case 'IDENTITY':
 					response = {
-						output: 'I am an AI DeFi assistant specializing in cryptocurrency and DeFi services. I can help you:\n' +
-							'1. Check token prices and market trends\n' +
-							'2. Analyze yields and risks across DeFi platforms\n' +
-							'3. Calculate expected returns and ROI\n' +
-							'4. Provide market insights and security advice',
+						output:
+							'我是 AI DeFi 助手，专注于加密货币和DeFi服务。我可以帮您：\n' +
+							'1. 查询代币价格和市场走势\n' +
+							'2. 分析不同DeFi平台的收益率和风险\n' +
+							'3. 计算预期收益和投资回报\n' +
+							'4. 提供市场趋势和安全建议',
 						type: 'identity',
 					};
 					break;
@@ -120,7 +121,7 @@ export class AgentService {
 						};
 					} else {
 						response = {
-							output: 'I specialize in cryptocurrency and DeFi. Please ask me about digital currencies, DeFi, investments, etc.',
+							output: '抱歉，我是一个专门的加密货币助手，主要解答数字货币和DeFi相关的问题。请问我关于加密货币、DeFi、投资等方面的问题。',
 							type: 'non_crypto',
 						};
 					}
@@ -130,8 +131,8 @@ export class AgentService {
 		} catch (error) {
 			console.error('Query error:', error);
 			return {
-				output: 'Error processing request',
-				error: error instanceof Error ? error.message : 'Unknown error',
+				output: '处理请求时发生错误',
+				error: error instanceof Error ? error.message : '未知错误',
 				type: 'error',
 			};
 		}

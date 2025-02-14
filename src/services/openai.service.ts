@@ -16,7 +16,7 @@ export class OpenAIService {
 			const result = await this.model.invoke(input);
 			return Array.isArray(result.content) ? result.content.join(' ') : result.content.toString();
 		} catch (error) {
-			return `OpenAI 查询失败: ${error instanceof Error ? error.message : '未知错误'}`;
+			return `OpenAI query failed: ${error instanceof Error ? error.message : 'Unknown error'}`;
 		}
 	}
 }
