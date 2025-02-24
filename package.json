@@ -1,54 +1,26 @@
 {
-	"name": "aladdin-ai-services",
-	"version": "1.0.0",
-	"description": "",
-	"main": "index.js",
-	"scripts": {
-		"dev": "cross-env NODE_ENV=development ts-node-dev --no-warnings --respawn --transpile-only ./src/main.ts",
-		"build": "webpack --mode production",
-		"lint:fix": "tsc --noEmit & eslint ./src --ext .ts,.tsx --fix",
-		"lint": "eslint \"src/**/*.{ts,js}\""
-	},
-	"keywords": [],
-	"author": "",
-	"license": "ISC",
-	"devDependencies": {
-		"@types/koa": "^2.15.0",
-		"@types/koa-bodyparser": "^4.3.12",
-		"@types/koa-static": "^4.0.4",
-		"@types/koa__cors": "^5.0.0",
-		"@types/koa__router": "^12.0.4",
-		"@types/node": "^22.10.5",
-		"@typescript-eslint/eslint-plugin": "^8.19.1",
-		"@typescript-eslint/parser": "^8.19.1",
-		"buffer": "^5.5.0||^6.0.0",
-		"cross-env": "^7.0.3",
-		"crypto-browserify": "^3.12.0",
-		"eslint": "^9.17.0",
-		"eslint-config-prettier": "^9.1.0",
-		"os-browserify": "^0.3.0",
-		"parcel": "^2.13.3",
-		"path-browserify": "^1.0.0",
-		"prettier": "^3.4.2",
-		"process": "^0.11.10",
-		"ts-loader": "^9.5.2",
-		"ts-node-dev": "^2.0.0",
-		"typescript": "^5.7.3",
-		"webpack": "^5.97.1",
-		"webpack-cli": "^6.0.1"
-	},
-	"dependencies": {
-		"@koa/cors": "^5.0.0",
-		"@koa/router": "^13.1.0",
-		"@langchain/community": "^0.3.24",
-		"@langchain/core": "^0.3.28",
-		"@langchain/openai": "^0.3.16",
-		"bignumber.js": "^9.1.2",
-		"dotenv": "^16.4.7",
-		"koa": "^2.15.3",
-		"koa-bodyparser": "^4.4.1",
-		"koa-static": "^5.0.0",
-		"langchain": "^0.3.10",
-		"serverless-http": "^3.2.0"
-	}
+  "name": "yd-ai-services",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "mastra dev"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "type": "module",
+  "dependencies": {
+    "@ai-sdk/openai": "^1.1.13",
+    "@mastra/core": "^0.4.0",
+    "edwin-sdk": "^0.3.4",
+    "mastra": "^0.2.4",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.5",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3"
+  }
 }

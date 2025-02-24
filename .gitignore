@@ -1,43 +1,7 @@
-# Dependencies
-node_modules/
-yarn-debug.log*
-yarn-error.log*
-
-# Environment
-.env
-.env.local
-.env.*.local
+output.txt
+node_modules
+dist
+.mastra
 .env.development
-
-# Build output
-dist/
-build/
-
-# IDE
-.idea/
-.vscode/
-*.sublime-project
-*.sublime-workspace
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Logs
-logs/
-*.log
-npm-debug.log*
-
-# Test coverage
-coverage/
-
-# Temp files
-*.tmp
-*.temp
-.cache/
-.parcel-cache/
-
-.env.production
-.aws-sam
-
- layer/
+.env
+*.db
