@@ -1,4 +1,4 @@
-# Aladdin AI Services
+# 🧞‍♂️ Aladdin AI Services
 
 This project provides AI-powered services built with Mastra and OpenAI.
 
@@ -100,4 +100,4 @@ ISC
 
 ## Author
 
-[Your Name/Organization]
+[zhijia@aladdin.build]
